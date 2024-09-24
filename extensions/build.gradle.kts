@@ -43,7 +43,7 @@ afterEvaluate {
 
                 groupId = "com.github.p1ay1s"
                 artifactId = "Zephyr"
-                version = "1.3"
+                version = "1.31"
             }
         }
     }
