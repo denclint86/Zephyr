@@ -39,11 +39,10 @@ afterEvaluate {
     publishing {
         publications {
             create<MavenPublication>("maven_public") {
-                from(components["release"])
-
                 groupId = "com.github.p1ay1s"
-                artifactId = "dev"
-                version = "1.32"
+                artifactId = "Zephyr:dev"
+                version = "1.33"
+                from(components["release"])
             }
         }
     }
@@ -63,7 +62,6 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
-    implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
