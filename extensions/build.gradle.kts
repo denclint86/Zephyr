@@ -41,8 +41,8 @@ afterEvaluate {
             create<MavenPublication>("maven_public") {
                 from(components["release"])
 
-                groupId = "com.github.p1ay1s:Zephyr"
-                artifactId = "extensions"
+                groupId = "com.github.p1ay1s"
+                artifactId = "Zephyr"
                 version = "1.3"
             }
         }
