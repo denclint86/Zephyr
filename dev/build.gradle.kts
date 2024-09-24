@@ -39,10 +39,11 @@ afterEvaluate {
     publishing {
         publications {
             create<MavenPublication>("maven_public") {
-                groupId = "com.github.p1ay1s"
-                artifactId = "Zephyr:dev"
-                version = "1.33"
                 from(components["release"])
+
+                groupId = "com.github.p1ay1s"
+                artifactId = "NIKI"
+                version = "v1.0"
             }
         }
     }
