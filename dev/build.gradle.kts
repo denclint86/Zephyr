@@ -49,6 +49,7 @@ afterEvaluate {
         }
     }
 }
+
 dependencies {
     implementation(libs.github.glide)
 
