@@ -42,8 +42,8 @@ afterEvaluate {
                 from(components["release"])
 
                 groupId = "com.github.p1ay1s"
-                artifactId = "Zephyr"
-                version = "1.31"
+                artifactId = "dev"
+                version = "1.32"
             }
         }
     }
