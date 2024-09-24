@@ -6,15 +6,14 @@ plugins {
 
 android {
     namespace = "com.p1ay1s.dev"
-    compileSdk = BuildSource.COMPILE_SDK
+    compileSdk = 34
 
     defaultConfig {
-        minSdk = BuildSource.MIN_SDK
+        minSdk = 24
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
-
     buildFeatures {
         dataBinding = true
     }
@@ -28,11 +27,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = BuildSource.JDK_VERSION
-        targetCompatibility = BuildSource.JDK_VERSION
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = BuildSource.JVM_TARGET
+        jvmTarget = "1.8"
     }
 }
 
@@ -42,9 +41,9 @@ afterEvaluate {
             create<MavenPublication>("maven_public") {
                 from(components["release"])
 
-                groupId = BuildSource.USER_FILED
-                artifactId = BuildSource.DEV
-                version = BuildSource.PUBLISH_VERSION
+                groupId = "com.github.p1ay1s"
+                artifactId = "Dev"
+                version = "1.0"
             }
         }
     }
