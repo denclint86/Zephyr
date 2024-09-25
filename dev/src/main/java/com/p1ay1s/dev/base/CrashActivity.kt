@@ -7,7 +7,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class CrashActivity : ViewBindingActivity<ActivityCrashBinding>() {
+open class CrashActivity : ViewBindingActivity<ActivityCrashBinding>() {
     private var backPressTimer: Job? = null
     private var oneMoreToFinish = false
 

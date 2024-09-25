@@ -12,7 +12,7 @@ import com.p1ay1s.dev.base.throwException
 /**
  * 具有 fragment 管理能力的 view
  */
-class FragmentControllerView : FrameLayout {
+open class FragmentControllerView : FrameLayout {
     lateinit var fragmentManager: FragmentManager
     protected lateinit var fragmentMap: LinkedHashMap<String, Fragment> // linkedHashMap 可以按 item 添加顺序排列
     protected lateinit var currentIndex: String

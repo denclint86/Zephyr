@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-class PreloadLayoutManager(
+open class PreloadLayoutManager(
     context: Context,
     orientation: Int,
     private val size: Int = 4,
