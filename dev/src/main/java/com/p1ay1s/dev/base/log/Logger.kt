@@ -33,9 +33,8 @@ const val ERROR = 5
 
 const val SECOND = 1000L
 
-@PublishedApi
 // 日志等级
-internal const val LOG_LEVEL = ERROR
+var LOG_LEVEL = ERROR
 
 // 是否启用自动删除
 const val CLEAN_OLD = true
@@ -116,6 +115,11 @@ object Logger {
         startLogCoroutine()
         registerHandler()
         cleanOldLogs()
+    }
+
+    fun setLogLevel(newLevel: Int) {
+        if (newLevel in VERBOSE..ERROR)
+            LOG_LEVEL = newLevel
     }
 
     /**
