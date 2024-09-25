@@ -75,6 +75,8 @@ object Logger {
     private lateinit var fileDir: File
     private lateinit var file: File
 
+    private var isCrashed = false
+
     /**
      * crash activity 功能需要在项目中注册您继承的子类并给 crashActivity 赋值
      */
@@ -201,13 +203,15 @@ object Logger {
                 try {
                     Looper.loop()
                 } catch (e: Throwable) {
-                    loggerCrashHandler(Looper.getMainLooper().thread, e)
+                    if (!isCrashed)
+                        loggerCrashHandler(Looper.getMainLooper().thread, e)
                 }
             }
         }
 
         Thread.setDefaultUncaughtExceptionHandler { t, e ->
-            loggerCrashHandler(t, e)
+            if (!isCrashed)
+                loggerCrashHandler(t, e)
         }
     }
 
