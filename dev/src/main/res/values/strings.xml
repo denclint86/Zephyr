@@ -2,4 +2,5 @@
 <resources>
     <string name="the_app_has_just_crashed">The app has just crashed..</string>
     <string name="stacktrace">StackTrace</string>
+    <string name="finish">kill process</string>
 </resources>

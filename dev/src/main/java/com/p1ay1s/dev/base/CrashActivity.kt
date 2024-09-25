@@ -1,5 +1,7 @@
 package com.p1ay1s.dev.base
 
+import android.annotation.SuppressLint
+import androidx.annotation.CallSuper
 import androidx.lifecycle.lifecycleScope
 import com.p1ay1s.dev.base.vb.ViewBindingActivity
 import com.p1ay1s.dev.databinding.ActivityCrashBinding
@@ -7,6 +9,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/**
+ * 必须开启 databinding
+ *
+ * 需要在项目中注册您继承的子类并给 Logger.crashActivity 赋值 YourChildActivity::java.class
+ */
 open class CrashActivity : ViewBindingActivity<ActivityCrashBinding>() {
     private var backPressTimer: Job? = null
     private var oneMoreToFinish = false
@@ -14,16 +21,21 @@ open class CrashActivity : ViewBindingActivity<ActivityCrashBinding>() {
     override fun ActivityCrashBinding.initBinding() {
         title.text = intent.getStringExtra("TITLE") ?: "empty"
         detail.text = intent.getStringExtra("DETAIL") ?: "empty"
+        finish.setOnClickListener {
+            finishAffinity()
+        }
     }
 
     /**
      * 简单的退出逻辑
      */
-    private fun handleBackPressed() {
+    protected fun handleBackPressed() {
         if (oneMoreToFinish) {
-            finishAfterTransition()
+            finishAffinity()
         } else {
             oneMoreToFinish = true
+
+            toast("再次点击退出")
             backPressTimer?.cancel()
             backPressTimer = lifecycleScope.launch {
                 delay(2000)
@@ -32,9 +44,9 @@ open class CrashActivity : ViewBindingActivity<ActivityCrashBinding>() {
         }
     }
 
-    @Deprecated("Deprecated in Java")
+    @SuppressLint("MissingSuperCall")
+    @CallSuper
     override fun onBackPressed() {
         handleBackPressed()
-        super.onBackPressed()
     }
 }

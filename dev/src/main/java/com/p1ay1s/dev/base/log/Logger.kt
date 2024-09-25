@@ -2,6 +2,7 @@
 
 package com.p1ay1s.dev.base.log
 
+import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.os.Handler
@@ -102,9 +103,11 @@ object Logger {
 
     // 出现未被捕获的错误时的处理方式
     private val loggerCrashHandler: ((Thread, Throwable) -> Unit) = { thread, throwable ->
-        val title = "at: ${thread.name}\nmessage: ${throwable.message}\n"
+        isCrashed = true
+
+        val title = thread.name
         val detail = Log.getStackTraceString(throwable)
-        val fullMsg = "${title}details: $detail"
+        val fullMsg = "at: ${title}\ndetails: $detail"
         appendLog(getName(ERROR), "UncaughtException", fullMsg)
         writeToFile()
 
@@ -126,11 +129,14 @@ object Logger {
     /**
      * 必须在 application 中调用以更快地初始化, 否则不能保证工作
      */
-    fun start() {
+    fun start(base: Context) = try {
+        appContext = base
         create()
         startLogCoroutine()
         registerHandler()
         cleanOldLogs()
+    } catch (_: Exception) {
+        appContext = base
     }
 
     fun setLogLevel(newLevel: Int) {
@@ -199,12 +205,11 @@ object Logger {
 
     private fun registerHandler() {
         Handler(Looper.getMainLooper()).post {
-            while (true) {
+            while (!isCrashed) {
                 try {
                     Looper.loop()
                 } catch (e: Throwable) {
-                    if (!isCrashed)
-                        loggerCrashHandler(Looper.getMainLooper().thread, e)
+                    loggerCrashHandler(Looper.getMainLooper().thread, e)
                 }
             }
         }

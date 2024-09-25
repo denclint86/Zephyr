@@ -2,14 +2,22 @@ package com.p1ay1s.dev.base
 
 import android.app.Application
 import android.content.Context
-import com.p1ay1s.dev.base.log.Logger
 
 lateinit var appContext: Context
 
-open class App : Application() {
-    override fun onCreate() {
-        super.onCreate()
-        appContext = this
-        Logger.start()
+abstract class App : Application() {
+
+    /**
+     * 您需要为 Logger 设置:
+     *
+     * example:
+     * Logger.crashActivity = YourCrashActivity::class.java
+     * Logger.start(application)
+     */
+    abstract fun whenAttachBaseContext(base: Context)
+
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(base)
+        whenAttachBaseContext(base)
     }
 }
