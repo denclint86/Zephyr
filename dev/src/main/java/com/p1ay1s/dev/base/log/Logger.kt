@@ -75,6 +75,11 @@ object Logger {
     private lateinit var fileDir: File
     private lateinit var file: File
 
+    /**
+     * crash activity 功能需要在项目中注册您继承的子类并给 crashActivity 赋值
+     */
+    var crashActivity: Class<out CrashActivity>? = null
+
     // 当前时间的格式
     private var accurateTimeFormat = SimpleDateFormat(TIME_FORMAT, Locale.getDefault())
 
@@ -91,6 +96,8 @@ object Logger {
         CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var loggerJob: Job? = null
 
+    private val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
+
     // 出现未被捕获的错误时的处理方式
     private val loggerCrashHandler: ((Thread, Throwable) -> Unit) = { thread, throwable ->
         val title = "at: ${thread.name}\nmessage: ${throwable.message}\n"
@@ -99,11 +106,18 @@ object Logger {
         appendLog(getName(ERROR), "UncaughtException", fullMsg)
         writeToFile()
 
-        with(Intent(appContext, CrashActivity::class.java)) {
-            putExtra("TITLE", title)
-            putExtra("DETAIL", detail)
-            setFlags(FLAG_ACTIVITY_NEW_TASK) // 不按返回栈规则启动的方式
-            appContext.startActivity(this)
+        if (crashActivity != null) {
+            with(Intent(appContext, crashActivity)) {
+                putExtra("TITLE", title)
+                putExtra("DETAIL", detail)
+                setFlags(FLAG_ACTIVITY_NEW_TASK) // 不按返回栈规则启动的方式
+                appContext.startActivity(this)
+            }
+        } else {
+            /**
+             * 交给默认的 handler 接管
+             */
+            defaultHandler?.uncaughtException(thread, throwable)
         }
     }
 
