@@ -1,5 +1,6 @@
 package com.p1ay1s.dev.base.util
 
+import com.p1ay1s.dev.base.appBaseUrl
 import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Callback
@@ -11,8 +12,9 @@ import java.util.concurrent.TimeUnit
 
 const val ON_FAILURE_CODE = -1
 
-lateinit var appBaseUrl: String
-
+/**
+ * 和网络请求有关的类
+ */
 object ServiceBuilder {
     private interface PingService {
         @GET("/")
@@ -51,15 +53,16 @@ object ServiceBuilder {
     /**
      * 检测 url 连通性冰回调一个 boolean 值
      */
-    fun ping(url: String, callback: (Boolean) -> Unit) = with(create<PingService>()) {
-        makeRequest(this.ping(),
-            {
-                callback(true)
-            },
-            { _, _ ->
-                callback(false)
-            })
-    }
+    fun ping(url: String, callback: (Boolean) -> Unit) =
+        with(retrofitBuilder(url).create(PingService::class.java)) {
+            makeRequest(this.ping(),
+                {
+                    callback(true)
+                },
+                { _, _ ->
+                    callback(false)
+                })
+        }
 
     /**
      * 在 model 层确定 T 的类型，进一步回调给 viewModel 层

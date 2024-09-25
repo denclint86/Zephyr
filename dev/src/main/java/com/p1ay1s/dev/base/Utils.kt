@@ -3,11 +3,18 @@
 package com.p1ay1s.dev.base
 
 import android.app.Activity
+import android.content.Context
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+
+// 主要是一些拓展的函数
+
+lateinit var appContext: Context
+lateinit var appBaseUrl: String
+var appIpAddress = ""
 
 val Activity.TAG
     get() = this::class.simpleName!!

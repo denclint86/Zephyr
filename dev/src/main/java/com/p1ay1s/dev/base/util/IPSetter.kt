@@ -11,10 +11,9 @@ import android.net.wifi.WifiManager
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.p1ay1s.dev.base.appContext
+import com.p1ay1s.dev.base.appIpAddress
 import java.net.Inet4Address
 import java.net.NetworkInterface
-
-var appIpAddress = ""
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 object IPSetter {

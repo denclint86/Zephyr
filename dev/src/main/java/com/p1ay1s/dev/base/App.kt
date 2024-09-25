@@ -3,8 +3,6 @@ package com.p1ay1s.dev.base
 import android.app.Application
 import android.content.Context
 
-lateinit var appContext: Context
-
 abstract class App : Application() {
 
     /**

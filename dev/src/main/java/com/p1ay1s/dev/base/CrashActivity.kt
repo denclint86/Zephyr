@@ -1,9 +1,10 @@
 package com.p1ay1s.dev.base
 
 import android.annotation.SuppressLint
+import android.os.Bundle
 import androidx.annotation.CallSuper
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.p1ay1s.dev.base.vb.ViewBindingActivity
 import com.p1ay1s.dev.databinding.ActivityCrashBinding
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -14,15 +15,22 @@ import kotlinx.coroutines.launch
  *
  * 需要在项目中注册您继承的子类并给 Logger.crashActivity 赋值 YourChildActivity::java.class
  */
-open class CrashActivity : ViewBindingActivity<ActivityCrashBinding>() {
+open class CrashActivity : AppCompatActivity() {
     private var backPressTimer: Job? = null
     private var oneMoreToFinish = false
 
-    override fun ActivityCrashBinding.initBinding() {
-        title.text = intent.getStringExtra("TITLE") ?: "empty"
-        detail.text = intent.getStringExtra("DETAIL") ?: "empty"
-        finish.setOnClickListener {
-            finishAffinity()
+    private val binding = ActivityCrashBinding.inflate(layoutInflater)
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        binding.run {
+            setContentView(root)
+            title.text = intent.getStringExtra("TITLE") ?: "empty"
+            detail.text = intent.getStringExtra("DETAIL") ?: "empty"
+            finish.setOnClickListener {
+                finishAffinity()
+            }
         }
     }
 
