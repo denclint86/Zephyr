@@ -14,7 +14,7 @@ open class ContainerFragment(private val fragmentMap: LinkedHashMap<String, Frag
     override fun FragmentContainerBinding.initBinding() {
         fragmentControllerViewContainer.run {
             controllerView = this
-            setFragmentManager(childFragmentManager)
+            fragmentManager = childFragmentManager
             submitMap(fragmentMap)
             init()
         }
