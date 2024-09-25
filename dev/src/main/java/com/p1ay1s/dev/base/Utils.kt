@@ -12,8 +12,8 @@ import kotlinx.coroutines.withContext
 
 // 主要是一些拓展的函数
 
-lateinit var appContext: Context
-lateinit var appBaseUrl: String
+var appContext: Context? = null
+var appBaseUrl = ""
 var appIpAddress = ""
 
 val Activity.TAG

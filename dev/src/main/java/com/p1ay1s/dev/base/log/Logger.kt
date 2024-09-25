@@ -111,12 +111,12 @@ object Logger {
         appendLog(getName(ERROR), "UncaughtException", fullMsg)
         writeToFile()
 
-        if (crashActivity != null) {
+        if (crashActivity != null && appContext != null) {
             with(Intent(appContext, crashActivity)) {
                 putExtra("TITLE", title)
                 putExtra("DETAIL", detail)
                 setFlags(FLAG_ACTIVITY_NEW_TASK) // 不按返回栈规则启动的方式
-                appContext.startActivity(this)
+                appContext!!.startActivity(this)
             }
         } else {
             /**
@@ -148,7 +148,8 @@ object Logger {
      * 令 Logger 开始工作
      */
     private fun create() {
-        fileDir = File(appContext.getExternalFilesDir(null), FILE_PATH)
+        if (appContext == null) return
+        fileDir = File(appContext!!.getExternalFilesDir(null), FILE_PATH)
         if (!fileDir.exists()) {
             fileDir.mkdirs()
         }
