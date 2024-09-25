@@ -13,7 +13,7 @@ import com.p1ay1s.dev.base.removeByValue
  * 具有 fragment 管理能力的 view
  */
 class FragmentControllerView : FrameLayout {
-    protected lateinit var fragmentManager: FragmentManager
+    lateinit var fragmentManager: FragmentManager
     protected lateinit var fragmentMap: LinkedHashMap<String, Fragment> // linkedHashMap 可以按 item 添加顺序排列
     protected lateinit var currentIndex: String
 
@@ -26,10 +26,6 @@ class FragmentControllerView : FrameLayout {
         attrs,
         defStyleAttr
     )
-
-    fun setFragmentManager(fragmentManager: FragmentManager) {
-        this.fragmentManager = fragmentManager
-    }
 
     fun submitMap(map: LinkedHashMap<String, Fragment>) {
         fragmentMap = map
