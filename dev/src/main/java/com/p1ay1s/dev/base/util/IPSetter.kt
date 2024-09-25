@@ -10,8 +10,8 @@ import android.net.NetworkInfo
 import android.net.wifi.WifiManager
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.p1ay1s.extensions.appContext
-import com.p1ay1s.extensions.log.logE
+import com.p1ay1s.dev.base.appContext
+import com.p1ay1s.dev.base.log.logE
 import java.net.Inet4Address
 import java.net.NetworkInterface
 
@@ -36,7 +36,7 @@ object IPSetter {
         addAction(WifiManager.WIFI_STATE_CHANGED_ACTION)
         addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION)
         addAction(ConnectivityManager.CONNECTIVITY_ACTION)
-        com.p1ay1s.extensions.appContext.registerReceiver(
+        appContext.registerReceiver(
             NetworkConnectChangedReceiver(), this,
             Context.RECEIVER_NOT_EXPORTED
         )
@@ -49,9 +49,9 @@ object IPSetter {
         var ip = "0.0.0.0"
 
         val wifiManager: WifiManager =
-            com.p1ay1s.extensions.appContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            appContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         val connectivityManager: ConnectivityManager =
-            com.p1ay1s.extensions.appContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            appContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
         try {
             if (wifiManager.isWifiEnabled) {
@@ -80,7 +80,7 @@ object IPSetter {
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            com.p1ay1s.extensions.log.logE(TAG, "failed to get ip address")
+            logE(TAG, "failed to get ip address")
         }
         return ip
     }

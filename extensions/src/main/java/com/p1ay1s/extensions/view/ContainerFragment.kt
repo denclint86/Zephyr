@@ -23,6 +23,9 @@ open class ContainerFragment(private val fragmentMap: LinkedHashMap<String, Frag
     fun switchToFragment(index: String) =
         controllerView?.switchToFragment(index)
 
-    fun <VB : ViewDataBinding> addAndSwitchToFragment(index: String, fragment: ChildFragment<VB>) =
-        controllerView?.addAndSwitchToFragment(index, fragment)
+    fun <VB : ViewDataBinding> addFragment(
+        index: String,
+        fragment: ChildFragment<VB>,
+        show: Boolean = true
+    ) = controllerView?.addFragment(index, fragment, show)
 }

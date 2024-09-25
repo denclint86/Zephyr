@@ -23,3 +23,13 @@ fun toast(msg: String, length: Int = Toast.LENGTH_SHORT) {
     if (msg.isNotBlank())
         Toast.makeText(appContext, msg, length).show()
 }
+
+fun <K, V> Map<K, V>.getKey(target: V): K? {
+    for ((key, value) in this)
+        if (target == value)
+            return key
+    return null
+}
+
+fun <K, V> HashMap<K, V>.removeByValue(value: V) =
+    getKey(value)?.let { remove(it) }

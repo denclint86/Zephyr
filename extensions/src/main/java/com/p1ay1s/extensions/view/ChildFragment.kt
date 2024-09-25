@@ -18,9 +18,9 @@ abstract class ChildFragment<VB : ViewDataBinding> : ViewBindingFragment<VB>() {
         logE(TAG, "failed to call parent's switchToFragment")
     }
 
-    protected fun addAndSwitchToFragment(index: String, fragment: ChildFragment<VB>) =
+    protected fun addFragment(index: String, fragment: ChildFragment<VB>, show: Boolean = true) =
         runCatching {
-            (parentFragment as ContainerFragment).addAndSwitchToFragment(index, fragment)
+            (parentFragment as ContainerFragment).addFragment(index, fragment, show)
         }.onFailure {
             logE(TAG, "failed to call parent's addAndSwitchToFragment")
         }
