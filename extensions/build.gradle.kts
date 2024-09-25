@@ -43,7 +43,7 @@ afterEvaluate {
 
 //                groupId = "com.github.p1ay1s"
 //                artifactId = "NIKI"
-                version = "1.34"
+                version = "1.35"
             }
         }
     }
