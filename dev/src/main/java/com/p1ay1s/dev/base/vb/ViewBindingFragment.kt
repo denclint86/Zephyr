@@ -14,9 +14,6 @@ abstract class ViewBindingFragment<VB : ViewDataBinding> : Fragment(),
 
     /**
      * 函数内可直接引用控件id
-     *
-     * example:
-     * @see ContainerFragment
      */
     abstract fun VB.initBinding()
 

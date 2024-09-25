@@ -2,8 +2,6 @@ package com.p1ay1s.dev.base
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.p1ay1s.extensions.log.logE
-import com.p1ay1s.extensions.TAG
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -40,9 +38,6 @@ abstract class BaseViewModel<Intent, State, Effect> : ViewModel() {
 
     fun sendIntent(intent: Intent) =
         viewModelScope.launch {
-            runCatching {
-                com.p1ay1s.extensions.log.logE(TAG, intent!!::class.simpleName.toString())
-            }
             channel.send(intent)
         }
 

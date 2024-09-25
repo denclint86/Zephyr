@@ -1,5 +1,6 @@
 package com.p1ay1s.extensions.view
 
+import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import com.p1ay1s.dev.base.ui.FragmentControllerView
 import com.p1ay1s.dev.base.vb.ViewBindingFragment
@@ -19,7 +20,9 @@ open class ContainerFragment(private val fragmentMap: LinkedHashMap<String, Frag
         }
     }
 
-    fun switchToFragment(index: String) {
+    fun switchToFragment(index: String) =
         controllerView?.switchToFragment(index)
-    }
+
+    fun <VB : ViewDataBinding> addAndSwitchToFragment(index: String, fragment: ChildFragment<VB>) =
+        controllerView?.addAndSwitchToFragment(index, fragment)
 }

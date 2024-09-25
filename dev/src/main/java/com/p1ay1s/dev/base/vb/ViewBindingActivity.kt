@@ -9,9 +9,6 @@ abstract class ViewBindingActivity<VB : ViewDataBinding> : AppCompatActivity(),
 
     /**
      * 函数内可直接引用控件id
-     *
-     * usage:
-     * @see CrashActivity
      */
     abstract fun VB.initBinding()
 

@@ -46,7 +46,10 @@ interface ViewBindingInterface<VB : ViewDataBinding> {
     fun getViewBinding(inflater: LayoutInflater): VB = try {
         with((javaClass.genericSuperclass as ParameterizedType).actualTypeArguments.filterIsInstance<Class<VB>>()) {
             val inflateMethod =
-                this[getViewBindingPosition(this)].getDeclaredMethod("inflate", LayoutInflater::class.java)
+                this[getViewBindingPosition(this)].getDeclaredMethod(
+                    "inflate",
+                    LayoutInflater::class.java
+                )
             val dataBinding = inflateMethod.invoke(null, inflater) as VB
             return dataBinding
         }

@@ -1,10 +1,9 @@
-package com.p1ay1s.extensions
+package com.p1ay1s.dev.base
 
 import android.app.Activity
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
-import com.p1ay1s.dev.base.appContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
