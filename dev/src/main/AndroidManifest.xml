@@ -8,16 +8,4 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
-    <activity android:name=".CrashActivity">
-        <intent-filter>
-            <action android:name="com.example.action.crash" />
-            <category android:name="android.intent.category.DEFAULT" />
-        </intent-filter>
-    </activity>
 </manifest>
-
-<!--    Intent intent = new Intent();-->
-<!--    intent.setAction("com.example.action.crash");-->
-<!--    intent.addCategory(Intent.CATEGORY_DEFAULT);-->
-<!--    intent.setData(Uri.parse("example://crash/字符串1/字符串2"));-->
-<!--    startActivity(intent);-->
