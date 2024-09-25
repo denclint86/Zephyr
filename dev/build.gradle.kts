@@ -41,9 +41,9 @@ afterEvaluate {
             create<MavenPublication>("maven_public") {
                 from(components["release"])
 
-                groupId = "com.github.p1ay1s"
-                artifactId = "NIKI"
-                version = "v1.0"
+//                groupId = "com.github.p1ay1s"
+//                artifactId = "NIKI"
+                version = "1.34"
             }
         }
     }
