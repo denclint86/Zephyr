@@ -40,8 +40,6 @@ afterEvaluate {
         publications {
             create<MavenPublication>("maven_public") {
                 from(components["release"])
-
-                version = "1.36"
             }
         }
     }

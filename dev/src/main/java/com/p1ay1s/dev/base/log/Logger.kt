@@ -9,6 +9,7 @@ import android.os.Looper
 import android.util.Log
 import com.p1ay1s.dev.base.CrashActivity
 import com.p1ay1s.dev.base.appContext
+import com.p1ay1s.dev.base.getFunctionName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -53,15 +54,6 @@ const val FILE_TYPE = ".txt"
 const val DATE_FORMAT = "yyyy年MM月dd日"
 const val LOG_HEADER = ""
 const val TIME_FORMAT = "MM/dd HH:mm:ss"
-
-inline fun getFunctionName(): String {
-    val functionName = object {}.javaClass.enclosingMethod?.name
-    return if (functionName != "getFunctionName") {
-        "$functionName: "
-    } else {
-        ""
-    }
-}
 
 private val levels = mapOf(
     VERBOSE to "Verbose",

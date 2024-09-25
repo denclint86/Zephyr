@@ -1,3 +1,5 @@
+@file:Suppress("NOTHING_TO_INLINE")
+
 package com.p1ay1s.dev.base
 
 import android.app.Activity
@@ -24,6 +26,15 @@ fun toast(msg: String, length: Int = Toast.LENGTH_SHORT) {
         Toast.makeText(appContext, msg, length).show()
 }
 
+inline fun getFunctionName(): String {
+    val functionName = object {}.javaClass.enclosingMethod?.name
+    return if (functionName != "getFunctionName") {
+        "$functionName: "
+    } else {
+        ""
+    }
+}
+
 fun <K, V> Map<K, V>.getKey(target: V): K? {
     for ((key, value) in this)
         if (target == value)
@@ -33,3 +44,7 @@ fun <K, V> Map<K, V>.getKey(target: V): K? {
 
 fun <K, V> HashMap<K, V>.removeByValue(value: V) =
     getKey(value)?.let { remove(it) }
+
+fun throwException(msg: String) {
+    throw IllegalStateException(getFunctionName() + msg)
+}

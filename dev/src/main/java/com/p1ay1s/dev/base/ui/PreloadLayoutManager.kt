@@ -10,6 +10,7 @@ class PreloadLayoutManager(
     private val size: Int = 4,
     reverseLayout: Boolean = false
 ) : LinearLayoutManager(context, orientation, reverseLayout) {
+
     /**
      * calculateExtraLayoutSpace 方法可以用来增加 RecyclerView 预留的额外空间,
      * 有助于提前加载屏幕外的 Item,

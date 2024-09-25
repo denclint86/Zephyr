@@ -6,8 +6,8 @@ import android.widget.FrameLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.p1ay1s.dev.base.getKey
-import com.p1ay1s.dev.base.log.getFunctionName
 import com.p1ay1s.dev.base.removeByValue
+import com.p1ay1s.dev.base.throwException
 
 /**
  * 具有 fragment 管理能力的 view
@@ -52,14 +52,17 @@ class FragmentControllerView : FrameLayout {
     protected fun getCurrentFragment() = getFragment(currentIndex)
 
     protected fun getFragment(index: String?): Fragment {
-        if (!isThisInitialized()) throw IllegalStateException("${getFunctionName()}has not be initialized")
-        val fragment = fragmentMap[index]
-            ?: throw IllegalStateException("${getFunctionName()}cannot find fragment with index $index")
-        return fragment
+        checkIfIsInitialized()
+
+        with(fragmentMap[index]) {
+            if (this == null) throwException("cannot find fragment with index $index")
+            return this!!
+        }
     }
 
     fun switchToFragment(target: Fragment) {
-        if (!isThisInitialized()) throw IllegalStateException("${getFunctionName()}has not be initialized")
+        checkIfIsInitialized()
+
         fragmentMap.values.forEach {
             if (it == target) {
                 if (target == getCurrentFragment()) return
@@ -68,20 +71,22 @@ class FragmentControllerView : FrameLayout {
                     show(target)
                 }.commitNow()
 
-                val key = fragmentMap.getKey(target)
-                    ?: throw IllegalStateException("${getFunctionName()}key cannot be null")
-                currentIndex = key
-                return
+                with(fragmentMap.getKey(target)) {
+                    if (this == null) throwException("key cannot be null")
+                    currentIndex = this!!
+                    return
+                }
             }
         }
-        throw IllegalStateException("${getFunctionName()}cannot find fragment")
+        throwException("cannot find fragment")
     }
 
     fun switchToFragment(target: String) =
         fragmentMap[target]?.let { switchToFragment(it) }
 
     fun addFragment(index: String, fragment: Fragment, show: Boolean = true) {
-        if (!isThisInitialized()) throw IllegalStateException("${getFunctionName()}has not be initialized")
+        checkIfIsInitialized()
+
         fragmentMap.keys.forEach {
             if (it == index) {
                 return
@@ -96,7 +101,8 @@ class FragmentControllerView : FrameLayout {
     }
 
     fun deleteFragment(target: Fragment) {
-        if (!isThisInitialized()) throw IllegalStateException("${getFunctionName()}has not be initialized")
+        checkIfIsInitialized()
+
         fragmentManager.beginTransaction().apply {
             target.let {
                 hide(it)
@@ -109,4 +115,8 @@ class FragmentControllerView : FrameLayout {
 
     fun deleteFragment(target: String) =
         deleteFragment(getFragment(target))
+
+    private fun checkIfIsInitialized() {
+        if (!isThisInitialized()) throwException("has not be initialized")
+    }
 }
