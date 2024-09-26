@@ -1,4 +1,4 @@
-package com.p1ay1s.dev.base.vb.ui
+package com.p1ay1s.dev.viewbinding.ui
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 

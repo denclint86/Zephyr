@@ -1,4 +1,4 @@
-package com.p1ay1s.dev.base.ui
+package com.p1ay1s.dev.ui
 
 import android.content.Context
 import androidx.recyclerview.widget.LinearLayoutManager

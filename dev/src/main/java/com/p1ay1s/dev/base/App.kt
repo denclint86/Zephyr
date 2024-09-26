@@ -10,7 +10,7 @@ abstract class App : Application() {
      *
      * example:
      * Logger.crashActivity = YourCrashActivity::class.java
-     * Logger.start(application)
+     * Logger.start(application, baseContext, com.p1ay1s.dev.log.ERROR)
      */
     abstract fun whenAttachBaseContext(base: Context)
 

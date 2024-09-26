@@ -1,16 +1,18 @@
 @file:Suppress("NOTHING_TO_INLINE")
 
-package com.p1ay1s.dev.base.log
+package com.p1ay1s.dev.log
 
+import android.app.Activity
+import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import com.p1ay1s.dev.base.CrashActivity
 import com.p1ay1s.dev.base.appContext
 import com.p1ay1s.dev.base.getFunctionName
+import com.p1ay1s.dev.base.throwException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -31,29 +33,30 @@ const val DEBUG = 2
 const val INFO = 3
 const val WARN = 4
 const val ERROR = 5
+const val DO_NOT_LOG = 6
 
 const val SECOND = 1000L
 
 // 日志等级
-var LOG_LEVEL = ERROR
+var LOG_LEVEL = DO_NOT_LOG
 
 // 是否启用自动删除
-const val CLEAN_OLD = true
-const val DAYS_RETAINED = 2
-const val HOURS_RETAINED = 0
-const val MINUTES_RETAINED = 0
-const val SECONDS_RETAINED = 0
+var CLEAN_OLD = true
+var DAYS_RETAINED = 2
+var HOURS_RETAINED = 0
+var MINUTES_RETAINED = 0
+var SECONDS_RETAINED = 0
 
 // 写入文件的间隔
-const val AUTO_WRITE_TIME_INTERVAL = SECOND * 5
+var AUTO_WRITE_TIME_INTERVAL = SECOND * 5
 
 // 命名偏好
-const val FILE_HEADER = "Logger-"
-const val FILE_PATH = "logs"
-const val FILE_TYPE = ".txt"
-const val DATE_FORMAT = "yyyy年MM月dd日"
-const val LOG_HEADER = ""
-const val TIME_FORMAT = "MM/dd HH:mm:ss"
+var FILE_HEADER = "Logger-"
+var FILE_PATH = "logs"
+var FILE_TYPE = ".txt"
+var DATE_FORMAT = "yyyy年MM月dd日"
+var LOG_HEADER = ""
+var TIME_FORMAT = "MM/dd HH:mm:ss"
 
 private val levels = mapOf(
     VERBOSE to "Verbose",
@@ -79,9 +82,9 @@ object Logger {
     private var isCrashed = false
 
     /**
-     * crash activity 功能需要在项目中注册您继承的子类并给 crashActivity 赋值
+     * crash activity 功能需要在项目中注册您的崩溃 activity 并给 crashActivity 赋值
      */
-    var crashActivity: Class<out CrashActivity>? = null
+    var crashActivity: Class<out Activity>? = null
 
     // 当前时间的格式
     private var accurateTimeFormat = SimpleDateFormat(TIME_FORMAT, Locale.getDefault())
@@ -129,24 +132,41 @@ object Logger {
     /**
      * 必须在 application 中调用以更快地初始化, 否则不能保证工作
      */
-    fun start(base: Context) = try {
+    fun start(application: Application, base: Context, logLevel: Int) = try {
+        setLogLevel(logLevel)
         appContext = base
-        create()
-        startLogCoroutine()
-        registerHandler()
-        cleanOldLogs()
+        init()
     } catch (_: Exception) {
         appContext = base
     }
 
-    fun setLogLevel(newLevel: Int) {
-        if (newLevel in VERBOSE..ERROR)
-            LOG_LEVEL = newLevel
-    }
+
+    fun setLogLevel(newLevel: Int) =
+        when (newLevel) {
+            in VERBOSE..ERROR -> {
+                LOG_LEVEL = newLevel
+                init()
+            }
+
+            DO_NOT_LOG -> {
+                LOG_LEVEL = newLevel
+                stop()
+            }
+
+            else -> throwException("log level should between VERBOSE and DO_NOT_LOG")
+        }
 
     /**
      * 令 Logger 开始工作
      */
+    private fun init() {
+        create()
+        startLogCoroutine()
+        registerHandler()
+        cleanOldLogs()
+    }
+
+
     private fun create() {
         if (appContext == null) return
         fileDir = File(appContext!!.getExternalFilesDir(null), FILE_PATH)
@@ -217,8 +237,8 @@ object Logger {
          */
         Handler(Looper.getMainLooper()).post {
             while (!isCrashed) {
-        // 当捕捉并处理异常后不再阻塞原生的 loop,
-        // 以便启动崩溃详情 activity
+                // 当捕捉并处理异常后不再阻塞原生的 loop,
+                // 以便启动崩溃详情 activity
                 try {
                     Looper.loop()
                 } catch (t: Throwable) {

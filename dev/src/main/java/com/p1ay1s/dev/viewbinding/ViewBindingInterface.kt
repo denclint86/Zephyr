@@ -1,6 +1,6 @@
 @file:Suppress("UNCHECKED_CAST")
 
-package com.p1ay1s.dev.base.vb
+package com.p1ay1s.dev.viewbinding
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -9,6 +9,8 @@ import java.lang.reflect.ParameterizedType
 
 /**
  * 功能 : 利用 java 反射获取 view binding 的类
+ *
+ * 将实现打包成 jar 可能无法获取到 ViewBinding 类
  */
 interface ViewBindingInterface<VB : ViewDataBinding> {
 
