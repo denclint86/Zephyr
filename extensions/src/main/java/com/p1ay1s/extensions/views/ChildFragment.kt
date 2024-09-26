@@ -11,7 +11,7 @@ import com.p1ay1s.dev.viewbinding.ViewBindingFragment
  */
 abstract class ChildFragment<VB : ViewDataBinding> : ViewBindingFragment<VB>() {
 
-    private fun getControllerView(): FragmentControllerView? =
+    protected fun getControllerView(): FragmentControllerView? =
         parentFragment.run {
             if (this is ContainerFragment)
                 return this.controllerView

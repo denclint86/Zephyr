@@ -5,7 +5,7 @@ import com.p1ay1s.dev.ui.FragmentControllerView
 import com.p1ay1s.dev.viewbinding.ViewBindingFragment
 import com.p1ay1s.extensions.databinding.FragmentContainerBinding
 
-open class ContainerFragment(private val fragmentMap: LinkedHashMap<String, Fragment>) :
+open class ContainerFragment(private val map: LinkedHashMap<String, Fragment>) :
     ViewBindingFragment<FragmentContainerBinding>() {
 
     var controllerView: FragmentControllerView? = null
@@ -14,7 +14,7 @@ open class ContainerFragment(private val fragmentMap: LinkedHashMap<String, Frag
         fragmentControllerViewContainer.run {
             controllerView = this
             fragmentManager = childFragmentManager
-            submitMap(fragmentMap)
+            fragmentMap = map
             init()
         }
     }

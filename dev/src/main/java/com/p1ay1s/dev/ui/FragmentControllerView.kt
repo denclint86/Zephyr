@@ -14,7 +14,7 @@ import com.p1ay1s.dev.base.throwException
  */
 open class FragmentControllerView : FrameLayout {
     lateinit var fragmentManager: FragmentManager
-    protected lateinit var fragmentMap: LinkedHashMap<String, Fragment> // linkedHashMap 可以按 item 添加顺序排列
+    lateinit var fragmentMap: LinkedHashMap<String, Fragment> // linkedHashMap 可以按 item 添加顺序排列
     protected lateinit var currentIndex: String
 
     constructor(context: Context) : super(context)
@@ -26,10 +26,6 @@ open class FragmentControllerView : FrameLayout {
         attrs,
         defStyleAttr
     )
-
-    fun submitMap(map: LinkedHashMap<String, Fragment>) {
-        fragmentMap = map
-    }
 
     protected fun isThisInitialized(): Boolean {
         return ::fragmentManager.isInitialized && ::fragmentMap.isInitialized && ::currentIndex.isInitialized

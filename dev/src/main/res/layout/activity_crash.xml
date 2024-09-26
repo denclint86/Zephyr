@@ -12,7 +12,7 @@
             android:padding="25dp">
 
             <TextView
-                android:id="@+id/finish"
+                android:id="@+id/finishButton"
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"
                 android:layout_gravity="center"
@@ -24,6 +24,7 @@
                 android:textSize="20sp" />
 
             <TextView
+                android:id="@+id/crashTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/the_app_has_just_crashed"
@@ -42,6 +43,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/stackTraceTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/stacktrace"
