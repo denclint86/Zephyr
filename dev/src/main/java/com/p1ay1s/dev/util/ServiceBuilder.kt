@@ -51,7 +51,7 @@ object ServiceBuilder {
     inline fun <reified T> create(): T = create(T::class.java)
 
     /**
-     * 检测 url 连通性冰回调一个 boolean 值
+     * 检测 url 连通性并回调一个 boolean 值
      */
     fun ping(url: String, callback: (Boolean) -> Unit) =
         with(retrofitBuilder(url).create(PingService::class.java)) {

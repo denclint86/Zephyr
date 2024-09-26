@@ -10,12 +10,15 @@ abstract class App : Application() {
      *
      * example:
      * Logger.crashActivity = YourCrashActivity::class.java
-     * Logger.start(application, baseContext, com.p1ay1s.dev.log.ERROR)
+     * Logger.start(application, applicationContext, com.p1ay1s.dev.log.ERROR)
      */
-    abstract fun whenAttachBaseContext(base: Context)
+    abstract fun whenOnCreate(appContext: Context)
 
-    override fun attachBaseContext(base: Context) {
-        super.attachBaseContext(base)
-        whenAttachBaseContext(base)
+    override fun onCreate() {
+        super.onCreate()
+        while (applicationContext == null) {
+            // 等到 context 可用为止
+        }
+        whenOnCreate(applicationContext)
     }
 }

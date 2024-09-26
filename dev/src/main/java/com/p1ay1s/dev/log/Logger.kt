@@ -132,12 +132,12 @@ object Logger {
     /**
      * 必须在 application 中调用以更快地初始化, 否则不能保证工作
      */
-    fun start(application: Application, base: Context, logLevel: Int) = try {
+    fun start(application: Application, applicationContext: Context, logLevel: Int) = try {
         setLogLevel(logLevel)
-        appContext = base
+        appContext = applicationContext
         init()
     } catch (_: Exception) {
-        appContext = base
+        appContext = applicationContext
     }
 
 
