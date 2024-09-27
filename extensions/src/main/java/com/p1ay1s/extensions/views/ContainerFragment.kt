@@ -9,11 +9,13 @@ import com.p1ay1s.dev.ui.FragmentControllerView
 import com.p1ay1s.extensions.databinding.FragmentContainerBinding
 
 open class ContainerFragment(private val map: LinkedHashMap<String, Fragment>) :
-    Fragment() {
+    Fragment(), FragmentControllerView.OnFragmentIndexChangedListener,
+    FragmentControllerView.OnPassDataListener {
 
     private lateinit var binding: FragmentContainerBinding
 
     var controllerView: FragmentControllerView? = null
+    private lateinit var currentIndex: String
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -29,10 +31,27 @@ open class ContainerFragment(private val map: LinkedHashMap<String, Fragment>) :
 
         binding.run {
             fragmentControllerViewContainer.run {
+                init(childFragmentManager, map)
                 controllerView = this
-                fragmentManager = childFragmentManager
-                fragmentMap = map
-                init()
+                setOnFragmentIndexChangeListener(this@ContainerFragment)
+            }
+        }
+    }
+
+    override fun onFragmentIndexChanged(index: String) {
+        currentIndex = index
+    }
+
+    fun getIndex(): String? {
+        if (::currentIndex.isInitialized)
+            return currentIndex
+        return null
+    }
+
+    override fun <T> onPassData(receiverIndex: String, data: T?) {
+        map.forEach { (index, fragment) ->
+            if (index == receiverIndex && fragment is ChildFragment<*>) {
+                fragment.onReceiveData(data)
             }
         }
     }

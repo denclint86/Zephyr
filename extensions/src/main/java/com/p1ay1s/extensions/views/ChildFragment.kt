@@ -17,4 +17,6 @@ abstract class ChildFragment<VB : ViewDataBinding> : ViewBindingFragment<VB>() {
                 return this.controllerView
             return null
         }
+
+    abstract fun <T> onReceiveData(data: T)
 }
