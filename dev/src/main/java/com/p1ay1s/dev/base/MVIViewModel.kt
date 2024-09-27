@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 /**
  * MVI 架构的 view model 基类
  */
-abstract class BaseViewModel<Intent, State, Effect> : ViewModel() {
+abstract class MVIViewModel<Intent, State, Effect> : ViewModel() {
 
     private val _stateFlow = MutableStateFlow(initUiState())
     val uiStateFlow: StateFlow<State> = _stateFlow.asStateFlow()

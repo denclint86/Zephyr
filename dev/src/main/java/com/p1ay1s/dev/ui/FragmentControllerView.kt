@@ -98,7 +98,7 @@ open class FragmentControllerView : FrameLayout {
                 hide(getCurrentFragment())
                 show(getFragment(target))
             }.commitNow()
-            currentIndex = target
+            updateIndex(target)
         }
     }
 
