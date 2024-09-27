@@ -9,7 +9,8 @@ import com.p1ay1s.dev.viewbinding.ViewBindingFragment
  *
  * @see ContainerFragment
  */
-abstract class ChildFragment<VB : ViewDataBinding> : ViewBindingFragment<VB>() {
+abstract class ChildFragment<VB : ViewDataBinding> : ViewBindingFragment<VB>(),
+    FragmentControllerView.OnPassDataListener {
 
     protected fun getControllerView(): FragmentControllerView? =
         parentFragment.run {
@@ -17,6 +18,4 @@ abstract class ChildFragment<VB : ViewDataBinding> : ViewBindingFragment<VB>() {
                 return this.controllerView
             return null
         }
-
-    abstract fun <T> onReceiveData(data: T)
 }

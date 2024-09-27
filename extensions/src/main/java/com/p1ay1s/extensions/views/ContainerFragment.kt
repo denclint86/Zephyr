@@ -9,8 +9,7 @@ import com.p1ay1s.dev.ui.FragmentControllerView
 import com.p1ay1s.extensions.databinding.FragmentContainerBinding
 
 open class ContainerFragment(private val map: LinkedHashMap<String, Fragment>) :
-    Fragment(), FragmentControllerView.OnFragmentIndexChangedListener,
-    FragmentControllerView.OnPassDataListener {
+    Fragment(), FragmentControllerView.OnFragmentIndexChangedListener {
 
     private lateinit var binding: FragmentContainerBinding
 
@@ -46,13 +45,5 @@ open class ContainerFragment(private val map: LinkedHashMap<String, Fragment>) :
         if (::currentIndex.isInitialized)
             return currentIndex
         return null
-    }
-
-    override fun <T> onPassData(receiverIndex: String, data: T?) {
-        map.forEach { (index, fragment) ->
-            if (index == receiverIndex && fragment is ChildFragment<*>) {
-                fragment.onReceiveData(data)
-            }
-        }
     }
 }
