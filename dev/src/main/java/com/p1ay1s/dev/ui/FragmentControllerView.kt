@@ -136,7 +136,7 @@ open class FragmentControllerView : FrameLayout {
         fragmentMap.remove(target)
     }
 
-    protected fun getCurrentFragment() = getFragment(currentIndex)
+    fun getCurrentFragment() = getFragment(currentIndex)
 
     protected fun getFragment(index: String?): Fragment {
         checkIfIsInitialized()

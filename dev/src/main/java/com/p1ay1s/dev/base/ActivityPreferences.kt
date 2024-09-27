@@ -1,7 +1,11 @@
 package com.p1ay1s.dev.base
 
 interface ActivityPreferences {
-    interface TwoBackPressToExit {
+    interface TwoBackPressToExitListener {
         fun twoBackPressToExit()
+    }
+
+    interface OnBackPressListener {
+        fun onBackPress()
     }
 }
