@@ -33,6 +33,11 @@ fun toast(msg: String, length: Int = Toast.LENGTH_SHORT) {
         Toast.makeText(appContext, msg, length).show()
 }
 
+fun Any?.toast() {
+    val str = this.toString()
+    if (str.isNotBlank()) toast(str)
+}
+
 inline fun getFunctionName(): String {
     val functionName = object {}.javaClass.enclosingMethod?.name
     return if (functionName != "getFunctionName") {

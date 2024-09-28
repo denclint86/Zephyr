@@ -10,6 +10,7 @@ import java.lang.reflect.ParameterizedType
 /**
  * 功能 : 利用 java 反射获取 view binding 的类
  *
+ * 由于需要获取 java class 所以封装成接口比较合适
  * 将实现打包成 jar 可能无法获取到 ViewBinding 类
  */
 interface ViewBindingInterface<VB : ViewDataBinding> {

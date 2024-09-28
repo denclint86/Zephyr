@@ -133,9 +133,8 @@ object Logger {
      * 必须在 application 中调用以更快地初始化, 否则不能保证工作
      */
     fun start(application: Application, applicationContext: Context, logLevel: Int) = try {
-        setLogLevel(logLevel)
         appContext = applicationContext
-        init()
+        setLogLevel(logLevel)
     } catch (_: Exception) {
         appContext = applicationContext
     }
@@ -148,11 +147,7 @@ object Logger {
                 init()
             }
 
-            DO_NOT_LOG -> {
-                LOG_LEVEL = newLevel
-                stop()
-            }
-
+            DO_NOT_LOG -> LOG_LEVEL = newLevel
             else -> throwException("log level should between VERBOSE and DO_NOT_LOG")
         }
 
