@@ -2,6 +2,11 @@ package com.p1ay1s.dev.base
 
 import android.app.Application
 import android.content.Context
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 abstract class App : Application() {
 
@@ -16,9 +21,14 @@ abstract class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        while (applicationContext == null) {
-            // 等到 context 可用为止
+        GlobalScope.launch {
+            while (applicationContext == null) {
+                // 等到 context 可用为止
+                delay(10)
+            }
+            withContext(Dispatchers.Main) {
+                whenOnCreate(applicationContext)
+            }
         }
-        whenOnCreate(applicationContext)
     }
 }

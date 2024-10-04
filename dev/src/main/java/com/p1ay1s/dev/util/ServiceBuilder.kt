@@ -1,11 +1,14 @@
 package com.p1ay1s.dev.util
 
 import com.p1ay1s.dev.base.appBaseUrl
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
+import retrofit2.awaitResponse
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import java.util.concurrent.TimeUnit
@@ -20,6 +23,13 @@ object ServiceBuilder {
         @GET("/")
         fun ping(): Call<Unit>
     }
+
+    val TAG = this::class.simpleName!!
+
+    const val LOADING = "loading "
+    const val SUCCESS = "success "
+    const val FAILED = "failed "
+    const val TIME_OUT = "time out "
 
     private const val TIMEOUT_SET = 15L
 
@@ -55,7 +65,7 @@ object ServiceBuilder {
      */
     fun ping(url: String, callback: (Boolean) -> Unit) =
         with(retrofitBuilder(url).create(PingService::class.java)) {
-            makeRequest(this.ping(),
+            requestEnqueue(this.ping(),
                 {
                     callback(true)
                 },
@@ -70,26 +80,58 @@ object ServiceBuilder {
      * @param onSuccess 包含返回体
      * @param onError 包含状态码以及信息
      */
-    inline fun <reified T> makeRequest(
+    inline fun <reified T> requestEnqueue(
         call: Call<T>,
         crossinline onSuccess: (data: T) -> Unit,
         crossinline onError: ((code: Int, msg: String) -> Unit)
     ) = call.enqueue(object : Callback<T> {
+        val url = call.request().url().toString()
+
         override fun onResponse(call: Call<T>, response: Response<T>) {
-            response.apply {
+            with(response) {
                 when {
                     isSuccessful && body() != null -> onSuccess(body()!!) // 成功
-                    isSuccessful && body() == null -> onError(
-                        ON_FAILURE_CODE,
-                        "connection timeout"
-                    ) // 超时
+
+                    isSuccessful && body() == null ->
+                        onError(
+                            ON_FAILURE_CODE,
+                            "connection timeout"
+                        ) // 超时
+
                     else -> onError(code(), message()) // 其他失败情况
                 }
             }
         }
 
         override fun onFailure(call: Call<T>, t: Throwable) {
-            onError(ON_FAILURE_CODE, t.message.toString()) // 失败
+            t.printStackTrace()
+            onError(ON_FAILURE_CODE, t.message ?: "Unknown error")
         }
     })
+
+    suspend inline fun <reified T> requestExecute(
+        call: Call<T>,
+        crossinline onSuccess: (data: T) -> Unit,
+        crossinline onError: ((code: Int, msg: String) -> Unit)
+    ) = withContext(Dispatchers.IO) {
+        val url = call.request().url().toString()
+        try {
+            with(call.awaitResponse()) {
+                when {
+                    isSuccessful && body() != null ->onSuccess(body()!!) // 成功
+
+                    isSuccessful && body() == null ->
+                        onError(
+                            ON_FAILURE_CODE,
+                            "connection timeout"
+                        ) // 超时
+
+                    else -> onError(code(), message()) // 其他失败情况
+                }
+            }
+        } catch (t: Throwable) {
+            t.printStackTrace()
+            onError(ON_FAILURE_CODE, t.message ?: "Unknown error")
+        }
+    }
 }

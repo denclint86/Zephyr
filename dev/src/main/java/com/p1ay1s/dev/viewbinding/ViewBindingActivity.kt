@@ -12,18 +12,18 @@ abstract class ViewBindingActivity<VB : ViewDataBinding> : AppCompatActivity(),
      */
     abstract fun VB.initBinding()
 
-    // protected val mBinding: VB by lazy(mode = LazyThreadSafetyMode.NONE) {
-    protected val mBinding: VB by lazy {
-        getViewBinding(layoutInflater)
-    }
+    private var _binding: VB? = null
+    protected val binding: VB
+        get() = _binding!!
 
     /**
      * 子类的 super 方法包含了 initBinding, 可以据此安排代码
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(mBinding.root)
-        mBinding.initBinding()
+        _binding = getViewBinding(layoutInflater)
+        setContentView(binding.root)
+        binding.initBinding()
     }
 
     /**
@@ -31,6 +31,7 @@ abstract class ViewBindingActivity<VB : ViewDataBinding> : AppCompatActivity(),
      */
     override fun onDestroy() {
         super.onDestroy()
-        mBinding.unbind()
+        _binding?.unbind()
+        _binding = null
     }
 }

@@ -17,12 +17,12 @@ import kotlinx.coroutines.launch
  *
  * 直接用您的 activity ,或在项目中注册您继承的子类并给 Logger.crashActivity 赋值 YourChildActivity::java.class
  */
-open class CrashActivity : Activity(), ActivityPreferences.TwoBackPressToExitListener {
-    private var backPressTimer: Job? = null
-    private var oneMoreToFinish = false
+abstract class CrashActivity : Activity(), ActivityPreferences.TwoBackPressToExitListener {
+    protected var backPressTimer: Job? = null
+    protected var oneMoreToFinish = false
 
-    private lateinit var binding: ActivityCrashBinding
-    private lateinit var crashScope: CoroutineScope
+    protected lateinit var binding: ActivityCrashBinding
+    protected lateinit var crashScope: CoroutineScope
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

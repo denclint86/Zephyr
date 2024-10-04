@@ -71,15 +71,12 @@ private val levels = mapOf(
  */
 fun getName(level: Int): String = levels[level]!!
 
-/**
- * 功能: 定时录入日志到本地, 在崩溃时展示崩溃原因
- */
-object Logger {
-    private val TAG = this::class.simpleName!!
-    private lateinit var fileDir: File
-    private lateinit var file: File
+open class LoggerClass {
+    protected val TAG = this::class.simpleName!!
+    protected lateinit var fileDir: File
+    protected lateinit var file: File
 
-    private var isCrashed = false
+    protected var isCrashed = false
 
     /**
      * crash activity 功能需要在项目中注册您的崩溃 activity 并给 crashActivity 赋值
@@ -87,25 +84,25 @@ object Logger {
     var crashActivity: Class<out Activity>? = null
 
     // 当前时间的格式
-    private var accurateTimeFormat = SimpleDateFormat(TIME_FORMAT, Locale.getDefault())
+    protected var accurateTimeFormat = SimpleDateFormat(TIME_FORMAT, Locale.getDefault())
 
     // 日期的格式
-    private var dateFormat: String =
+    protected var dateFormat: String =
         SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date())
 
     // 文件命名格式
-    private var fileName = FILE_HEADER + dateFormat + FILE_TYPE
+    protected var fileName = FILE_HEADER + dateFormat + FILE_TYPE
 
-    private val logBuffer = StringBuffer()
+    protected val logBuffer = StringBuffer()
 
-    private val loggerScope =
+    protected val loggerScope =
         CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private var loggerJob: Job? = null
+    protected var loggerJob: Job? = null
 
-    private val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
+    protected val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
 
     // 出现未被捕获的错误时的处理方式
-    private val loggerCrashHandler: ((Thread, Throwable) -> Unit) = { thread, throwable ->
+    protected val loggerCrashHandler: ((Thread, Throwable) -> Unit) = { thread, throwable ->
         isCrashed = true
 
         val title = thread.name
@@ -154,7 +151,7 @@ object Logger {
     /**
      * 令 Logger 开始工作
      */
-    private fun init() {
+    protected fun init() {
         create()
         startLogCoroutine()
         registerHandler()
@@ -162,7 +159,7 @@ object Logger {
     }
 
 
-    private fun create() {
+    protected fun create() {
         if (appContext == null) return
         fileDir = File(appContext!!.getExternalFilesDir(null), FILE_PATH)
         if (!fileDir.exists()) {
@@ -172,7 +169,7 @@ object Logger {
         file = File(fileDir, fileName)
     }
 
-    private fun startLogCoroutine() {
+    protected fun startLogCoroutine() {
         if (loggerJob == null || loggerJob?.isCancelled == true) {
             loggerJob = loggerScope.launch {
                 while (isActive) {
@@ -188,7 +185,7 @@ object Logger {
         loggerScope.cancel()
     }
 
-    private fun writeToFile() {
+    protected fun writeToFile() {
         try {
             val file = getLogFile()
             FileWriter(file, true).use { writer ->
@@ -206,7 +203,7 @@ object Logger {
         logBuffer.append(logMessage)
     }
 
-    private fun getLogFile(): File {
+    protected fun getLogFile(): File {
         val fileName =
             FILE_HEADER + dateFormat + FILE_TYPE
         /**
@@ -219,7 +216,7 @@ object Logger {
         return file
     }
 
-    private fun registerHandler() {
+    protected fun registerHandler() {
         /**
          * 主线程捕获原理:
          * 用 handler 给主线程的 looper 添加新的任务——进入一个不断 loop 的死循环,
@@ -248,7 +245,7 @@ object Logger {
         }
     }
 
-    private fun cleanOldLogs() {
+    protected fun cleanOldLogs() {
         if (!CLEAN_OLD) {
             logI(TAG, "未启用日志清除")
             return
@@ -263,9 +260,16 @@ object Logger {
         }
     }
 
-    private fun formatTime(): Long {
+    protected fun formatTime(): Long {
         return (DAYS_RETAINED * 24 * 60 * 60 + HOURS_RETAINED * 60 * 60 + MINUTES_RETAINED * 60 + SECONDS_RETAINED) * SECOND
     }
+}
+
+/**
+ * 功能: 定时录入日志到本地, 在崩溃时展示崩溃原因
+ */
+object Logger : LoggerClass() {
+
 }
 
 inline fun logV(tag: String = "", msg: String = "") =

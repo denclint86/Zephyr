@@ -10,6 +10,8 @@ import com.p1ay1s.dev.base.throwException
 
 /**
  * 具有 fragment 管理能力的 view
+ *
+ * 实现了这个 view 之后我才知道已经有 jetpack 组件 navController 了, 比我这个强太多
  */
 open class FragmentControllerView : FrameLayout {
 
@@ -47,6 +49,9 @@ open class FragmentControllerView : FrameLayout {
         mIndexChangedListener?.onFragmentIndexChanged(newIndex)
     }
 
+    /**
+     * 必须调用才能正常使用
+     */
     fun init(
         fragmentManager: FragmentManager,
         fragmentMap: LinkedHashMap<String, Fragment>
@@ -142,7 +147,7 @@ open class FragmentControllerView : FrameLayout {
         checkIfIsInitialized()
         when {
             index.isNullOrBlank() ->
-                throwException("try to get a fragment with empty key")
+                throwException("try to get a fragment with an empty key")
 
             !isIndexExist(index) ->
                 throwException("try to get a fragment with a not existed key")
@@ -167,6 +172,6 @@ open class FragmentControllerView : FrameLayout {
     }
 
     private fun checkIfIsInitialized() {
-        if (!isInitialized) throwException("fragment controller view has not be initialized")
+        if (!isInitialized) throwException("fragment controller view has not been initialized")
     }
 }

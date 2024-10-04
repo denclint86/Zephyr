@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * 可以自动切换图片的 view, 可以选择 suspend 或者直接在主线程执行
+ * 可以自动切换图片的 view, 点击事件可以选择 suspend 或者直接在主线程执行
  *
  * 限制宽高为其中的最小值
  */
@@ -30,11 +30,11 @@ open class ChangingImageButton @JvmOverloads constructor(
     }
 
     var rippleColor = "#40000000"
-    private var mListener: (suspend () -> Status)? = null
-    private val viewScope: CoroutineScope by lazy { CoroutineScope(Dispatchers.IO) }
-    private var job: Job? = null
-    private var imageA: Int? = null
-    private var imageB: Int? = null
+    protected var mListener: (suspend () -> Status)? = null
+    protected val viewScope: CoroutineScope by lazy { CoroutineScope(Dispatchers.IO) }
+    protected var job: Job? = null
+    protected var imageA: Int? = null
+    protected var imageB: Int? = null
 
     init {
         scaleType = ScaleType.FIT_CENTER
@@ -58,7 +58,7 @@ open class ChangingImageButton @JvmOverloads constructor(
         }
     }
 
-    fun setImageSources(imageA: Int, imageB: Int) {
+    fun setImageResources(imageA: Int, imageB: Int) {
         this.imageA = imageA
         this.imageB = imageB
         switchImage(Status.IMAGE_A)
@@ -70,7 +70,7 @@ open class ChangingImageButton @JvmOverloads constructor(
         setImageResource(id)
     }
 
-    private fun handleClick() {
+    protected fun handleClick() {
         if (mListener == null) return
         job?.cancel()
         job = viewScope.launch {

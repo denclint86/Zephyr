@@ -10,7 +10,9 @@ import androidx.fragment.app.Fragment
 abstract class ViewBindingFragment<VB : ViewDataBinding> : Fragment(),
     ViewBindingInterface<VB> {
 
-    protected lateinit var mBinding: VB
+    private var _binding: VB? = null
+    protected val binding: VB
+        get() = _binding!!
 
     /**
      * 函数内可直接引用控件id
@@ -22,20 +24,18 @@ abstract class ViewBindingFragment<VB : ViewDataBinding> : Fragment(),
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        mBinding = getViewBinding(inflater, container)
-        return mBinding.root
+        _binding = getViewBinding(inflater, container)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mBinding.initBinding()
+        binding.initBinding()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        // 释放, 防止内存泄漏
-        if (::mBinding.isInitialized) {
-            mBinding.unbind()
-        }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding?.unbind()
+        _binding = null
     }
 }
