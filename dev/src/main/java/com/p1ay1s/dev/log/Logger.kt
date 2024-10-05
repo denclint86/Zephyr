@@ -13,6 +13,7 @@ import android.util.Log
 import com.p1ay1s.dev.base.appContext
 import com.p1ay1s.dev.base.getFunctionName
 import com.p1ay1s.dev.base.throwException
+import com.p1ay1s.dev.base.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -127,13 +128,18 @@ open class LoggerClass {
     }
 
     /**
-     * 必须在 application 中调用以更快地初始化, 否则不能保证工作
+     * 必须在 application 中启动
      */
-    fun start(application: Application, applicationContext: Context, logLevel: Int) = try {
-        appContext = applicationContext
+    fun Application.startLogger(
+        context: Context,
+        logLevel: Int
+    ) = runCatching {
+        appContext = context
         setLogLevel(logLevel)
-    } catch (_: Exception) {
-        appContext = applicationContext
+    }.onFailure {
+        appContext = context
+        if (LOG_LEVEL >= DEBUG)
+            "Logger 启动失败".toast()
     }
 
 

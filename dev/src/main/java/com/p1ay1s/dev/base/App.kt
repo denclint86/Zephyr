@@ -10,7 +10,7 @@ abstract class App : Application() {
      *
      * example:
      * Logger.crashActivity = YourCrashActivity::class.java
-     * Logger.start(application, applicationContext, com.p1ay1s.dev.log.ERROR)
+     * startLogger(applicationContext, com.p1ay1s.dev.log.ERROR)
      */
     abstract fun whenOnCreate(appContext: Context)
 
