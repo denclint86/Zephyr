@@ -12,6 +12,8 @@ import java.lang.reflect.ParameterizedType
  *
  * 由于需要获取 java class 所以封装成接口比较合适
  * 将实现打包成 jar 可能无法获取到 ViewBinding 类
+ *
+ * 取消了 try-catch , 有时候把异常捕捉起来反而误事
  */
 interface ViewBindingInterface<VB : ViewDataBinding> {
     /**
@@ -36,34 +38,20 @@ interface ViewBindingInterface<VB : ViewDataBinding> {
         inflater: LayoutInflater,
         container: ViewGroup?,
         attachToRoot: Boolean = false
-    ): VB {
-        try {
-            with((javaClass.genericSuperclass as ParameterizedType).actualTypeArguments.filterIsInstance<Class<VB>>()) {
-                val inflateMethod = this.getViewBindingClass().getDeclaredMethod(
-                    "inflate",
-                    LayoutInflater::class.java,
-                    ViewGroup::class.java,
-                    Boolean::class.java
-                )
-                val dataBinding =
-                    inflateMethod.invoke(null, inflater, container, attachToRoot) as VB
-                return dataBinding
-            }
-        } catch (e: Exception) {
-            val exceptionType = e.javaClass.simpleName
-            val exceptionMessage = e.message
-            val exceptionStackTrace = e.stackTrace.toString()
-            throw IllegalArgumentException(
-                "can not get ViewBinding instance through reflection!" +
-                        "\nException type: $exceptionType" +
-                        "\nMessage: $exceptionMessage" +
-                        "\nStacktrace:" +
-                        "\n$exceptionStackTrace"
+    ): VB =
+        with((javaClass.genericSuperclass as ParameterizedType).actualTypeArguments.filterIsInstance<Class<VB>>()) {
+            val inflateMethod = this.getViewBindingClass().getDeclaredMethod(
+                "inflate",
+                LayoutInflater::class.java,
+                ViewGroup::class.java,
+                Boolean::class.java
             )
+            val dataBinding =
+                inflateMethod.invoke(null, inflater, container, attachToRoot) as VB
+            return dataBinding
         }
-    }
 
-    fun getViewBinding(inflater: LayoutInflater): VB = try {
+    fun getViewBinding(inflater: LayoutInflater): VB =
         with((javaClass.genericSuperclass as ParameterizedType).actualTypeArguments.filterIsInstance<Class<VB>>()) {
             val inflateMethod =
                 this.getViewBindingClass().getDeclaredMethod(
@@ -73,16 +61,4 @@ interface ViewBindingInterface<VB : ViewDataBinding> {
             val dataBinding = inflateMethod.invoke(null, inflater) as VB
             return dataBinding
         }
-    } catch (e: Exception) {
-        val exceptionType = e.javaClass.simpleName
-        val exceptionMessage = e.message
-        val exceptionStackTrace = e.stackTrace.toString()
-        throw IllegalArgumentException(
-            "can not get ViewBinding instance through reflection!" +
-                    "\nException type: $exceptionType" +
-                    "\nMessage: $exceptionMessage" +
-                    "\nStacktrace:" +
-                    "\n$exceptionStackTrace"
-        )
-    }
 }
