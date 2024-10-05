@@ -14,42 +14,59 @@ import java.lang.reflect.ParameterizedType
  * 将实现打包成 jar 可能无法获取到 ViewBinding 类
  */
 interface ViewBindingInterface<VB : ViewDataBinding> {
-
     /**
-     * 查找类名中有"binding"的索引, 未找到时抛出异常
+     * 从 vbClass 中找到目标类并返回
      */
-    fun getViewBindingPosition(vbClass: List<Class<VB>>): Int {
+    private fun List<Class<VB>>.getViewBindingClass(): Class<VB> {
         // 找到包含 "binding" 的索引
-        val position = vbClass.indexOfFirst { it.name.contains("binding", ignoreCase = true) }
+        val position =
+            indexOfFirst { it.simpleName.endsWith("Binding") }
 
-        if (position == -1)
-            throw IllegalStateException("cannot find class whose name contains \"binding\"")
-        return position
+        if (position == -1) {
+            val builder = StringBuilder("cannot find a class named 'Binding' in this list:")
+            forEach {
+                builder.append("\n" + it.name)
+            }
+            throw IllegalStateException(builder.toString())
+        }
+        return get(position)
     }
 
     fun getViewBinding(
         inflater: LayoutInflater,
         container: ViewGroup?,
-    ): VB = try {
-        with((javaClass.genericSuperclass as ParameterizedType).actualTypeArguments.filterIsInstance<Class<VB>>()) {
-            val inflateMethod = this[getViewBindingPosition(this)].getDeclaredMethod(
-                "inflate",
-                LayoutInflater::class.java,
-                ViewGroup::class.java,
-                Boolean::class.java
+        attachToRoot: Boolean = false
+    ): VB {
+        try {
+            with((javaClass.genericSuperclass as ParameterizedType).actualTypeArguments.filterIsInstance<Class<VB>>()) {
+                val inflateMethod = this.getViewBindingClass().getDeclaredMethod(
+                    "inflate",
+                    LayoutInflater::class.java,
+                    ViewGroup::class.java,
+                    Boolean::class.java
+                )
+                val dataBinding =
+                    inflateMethod.invoke(null, inflater, container, attachToRoot) as VB
+                return dataBinding
+            }
+        } catch (e: Exception) {
+            val exceptionType = e.javaClass.simpleName
+            val exceptionMessage = e.message
+            val exceptionStackTrace = e.stackTrace.toString()
+            throw IllegalArgumentException(
+                "can not get ViewBinding instance through reflection!" +
+                        "\nException type: $exceptionType" +
+                        "\nMessage: $exceptionMessage" +
+                        "\nStacktrace:" +
+                        "\n$exceptionStackTrace"
             )
-            val dataBinding = inflateMethod.invoke(null, inflater, container, false) as VB
-            return dataBinding
         }
-    } catch (e: Exception) {
-        e.printStackTrace()
-        throw IllegalArgumentException("can not get ViewBinding instance through reflection!")
     }
 
     fun getViewBinding(inflater: LayoutInflater): VB = try {
         with((javaClass.genericSuperclass as ParameterizedType).actualTypeArguments.filterIsInstance<Class<VB>>()) {
             val inflateMethod =
-                this[getViewBindingPosition(this)].getDeclaredMethod(
+                this.getViewBindingClass().getDeclaredMethod(
                     "inflate",
                     LayoutInflater::class.java
                 )
@@ -57,7 +74,15 @@ interface ViewBindingInterface<VB : ViewDataBinding> {
             return dataBinding
         }
     } catch (e: Exception) {
-        e.printStackTrace()
-        throw IllegalArgumentException("can not get ViewBinding instance through reflection!")
+        val exceptionType = e.javaClass.simpleName
+        val exceptionMessage = e.message
+        val exceptionStackTrace = e.stackTrace.toString()
+        throw IllegalArgumentException(
+            "can not get ViewBinding instance through reflection!" +
+                    "\nException type: $exceptionType" +
+                    "\nMessage: $exceptionMessage" +
+                    "\nStacktrace:" +
+                    "\n$exceptionStackTrace"
+        )
     }
 }
