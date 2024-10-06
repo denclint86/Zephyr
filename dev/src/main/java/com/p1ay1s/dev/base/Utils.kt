@@ -2,10 +2,14 @@
 
 package com.p1ay1s.dev.base
 
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.app.Activity
 import android.content.Context
-import android.widget.Adapter
+import android.content.pm.PackageManager
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.Dispatchers
@@ -23,6 +27,21 @@ val Fragment.TAG
     get() = this::class.simpleName!!
 val ViewModel.TAG
     get() = this::class.simpleName!!
+
+/**
+ * @param name Manifest.permission.XXX
+ */
+fun AppCompatActivity.requestPermission(
+    name: String = WRITE_EXTERNAL_STORAGE,
+    callback: (isGranted: Boolean) -> Unit
+) = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+    callback(it)
+}.launch(name)
+
+fun Activity.isPermissionGranted(name: String): Boolean = ContextCompat.checkSelfPermission(
+    this,
+    name
+) == PackageManager.PERMISSION_GRANTED
 
 suspend fun toastSuspended(msg: String, length: Int = Toast.LENGTH_SHORT) =
     withContext(Dispatchers.Main) {
