@@ -110,7 +110,7 @@ open class LoggerClass {
         val detail = Log.getStackTraceString(throwable)
         val fullMsg = "at: ${title}\ndetails: $detail"
 
-        println(fullMsg)
+        Log.e(TAG, fullMsg)
 
         appendLog(getName(ERROR), "UncaughtException", fullMsg)
         writeToFile()
@@ -281,42 +281,52 @@ object Logger : LoggerClass() {
 
 }
 
-inline fun logV(tag: String = "", msg: String = "") =
+inline fun logV(tag: String = "", msg: String = "", getFunctionName: Boolean = true) =
     with(VERBOSE) {
         if (LOG_LEVEL <= this) {
-            Log.v(tag, LOG_HEADER + getFunctionName() + msg)
-            Logger.appendLog(getName(this), tag, LOG_HEADER + msg)
+            val str =
+                if (getFunctionName) LOG_HEADER + getFunctionName() + msg else LOG_HEADER + msg
+            Log.v(tag, str)
+            Logger.appendLog(getName(this), tag, str)
         }
     }
 
-inline fun logD(tag: String = "", msg: String = "") =
+inline fun logD(tag: String = "", msg: String = "", getFunctionName: Boolean = true) =
     with(DEBUG) {
         if (LOG_LEVEL <= this) {
-            Log.d(tag, LOG_HEADER + getFunctionName() + msg)
-            Logger.appendLog(getName(this), tag, LOG_HEADER + msg)
+            val str =
+                if (getFunctionName) LOG_HEADER + getFunctionName() + msg else LOG_HEADER + msg
+            Log.d(tag, str)
+            Logger.appendLog(getName(this), tag, str)
         }
     }
 
-inline fun logI(tag: String = "", msg: String = "") =
+inline fun logI(tag: String = "", msg: String = "", getFunctionName: Boolean = true) =
     with(INFO) {
         if (LOG_LEVEL <= this) {
-            Log.i(tag, LOG_HEADER + getFunctionName() + msg)
-            Logger.appendLog(getName(this), tag, LOG_HEADER + msg)
+            val str =
+                if (getFunctionName) LOG_HEADER + getFunctionName() + msg else LOG_HEADER + msg
+            Log.i(tag, str)
+            Logger.appendLog(getName(this), tag, str)
         }
     }
 
-inline fun logW(tag: String = "", msg: String = "") =
+inline fun logW(tag: String = "", msg: String = "", getFunctionName: Boolean = true) =
     with(WARN) {
         if (LOG_LEVEL <= this) {
-            Log.w(tag, LOG_HEADER + getFunctionName() + msg)
-            Logger.appendLog(getName(this), tag, LOG_HEADER + msg)
+            val str =
+                if (getFunctionName) LOG_HEADER + getFunctionName() + msg else LOG_HEADER + msg
+            Log.w(tag, str)
+            Logger.appendLog(getName(this), tag, str)
         }
     }
 
-inline fun logE(tag: String = "", msg: String = "") =
+inline fun logE(tag: String = "", msg: String = "", getFunctionName: Boolean = true) =
     with(ERROR) {
         if (LOG_LEVEL <= this) {
-            Log.e(tag, LOG_HEADER + getFunctionName() + msg)
-            Logger.appendLog(getName(this), tag, LOG_HEADER + msg)
+            val str =
+                if (getFunctionName) LOG_HEADER + getFunctionName() + msg else LOG_HEADER + msg
+            Log.e(tag, str)
+            Logger.appendLog(getName(this), tag, str)
         }
     }

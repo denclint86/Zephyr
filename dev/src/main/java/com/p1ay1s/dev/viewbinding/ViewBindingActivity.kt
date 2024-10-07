@@ -22,7 +22,7 @@ abstract class ViewBindingActivity<VB : ViewDataBinding> : AppCompatActivity(),
      * 子类的 super 方法包含了 initBinding, 可以据此安排代码
      */
     override fun onCreate(savedInstanceState: Bundle?) {
-        logI(TAG, TAG)
+        logI(TAG, "$TAG onCreate", false)
         super.onCreate(savedInstanceState)
         _binding = getViewBinding(layoutInflater)
         setContentView(binding.root)
@@ -30,22 +30,22 @@ abstract class ViewBindingActivity<VB : ViewDataBinding> : AppCompatActivity(),
     }
 
     override fun onStart() {
-        logI(TAG, TAG)
+        logI(TAG, "$TAG onStart", false)
         super.onStart()
     }
 
     override fun onResume() {
-        logI(TAG, TAG)
+        logI(TAG, "$TAG onResume", false)
         super.onResume()
     }
 
     override fun onPause() {
-        logI(TAG, TAG)
+        logI(TAG, "$TAG onPause", false)
         super.onPause()
     }
 
     override fun onStop() {
-        logI(TAG, TAG)
+        logI(TAG, "$TAG onStop", false)
         super.onStop()
     }
 
@@ -53,7 +53,7 @@ abstract class ViewBindingActivity<VB : ViewDataBinding> : AppCompatActivity(),
      * 防止内存泄露
      */
     override fun onDestroy() {
-        logI(TAG, TAG)
+        logI(TAG, "$TAG onDestroy", false)
         super.onDestroy()
         _binding?.unbind()
         _binding = null
