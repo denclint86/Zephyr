@@ -60,7 +60,6 @@ fun Fragment.findFragmentHost(): FragmentHost? {
         view = parent as? View // as? 如果转换失败则变为 null
         parent = view?.parent
     }
-
     return null
 }
 
