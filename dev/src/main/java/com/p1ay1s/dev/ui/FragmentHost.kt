@@ -14,6 +14,7 @@ class FragmentHost(
         fun onFragmentIndexChanged(index: String)
     }
 
+    private var lastIndex: String? = null
     private var currentIndex: String = fragmentMap.keys.first()
         set(value) {
             indexChangedListener?.onFragmentIndexChanged(value)
@@ -64,6 +65,7 @@ class FragmentHost(
                 show(getFragment(tag))
             }.commitNow()
 
+            lastIndex = currentIndex
             currentIndex = tag
         }
     }
@@ -78,9 +80,12 @@ class FragmentHost(
         fragmentManager.beginTransaction().apply {
             fragmentMap[index] = fragment
             add(viewId, fragment, index)
-            if (show)
+            if (show) {
                 hide(getCurrentFragment())
-            else
+
+                lastIndex = currentIndex
+                currentIndex = index
+            } else
                 hide(fragment)
         }.commitNow()
     }
@@ -88,24 +93,24 @@ class FragmentHost(
 //     fun remove(tag: Fragment, defaultIndex: String, switch: Boolean) =
 //        deleteFragment(fragmentMap.getKey(tag)!!, defaultIndex, switch)
 
-    /**
-     * 移除 fragment
-     *
-     * @param newIndex 移除后切换的索引
-     * @param switch 是否选择切换(移除当前显示的 fragment 则会强制切换)
-     */
-    fun remove(tag: String, newIndex: String, switch: Boolean = false) {
-        if (!isIndexExisted(tag)) return
+    fun pop(tag: String) {
+        lastIndex?.let { pop(tag, it) }
+    }
 
-        if (tag == currentIndex || switch) // 当 tag == currentIndex 则强制切换
-            navigate(newIndex)
+    /**
+     * @param newIndex 移除后切换的索引
+     */
+    fun pop(tag: String, newIndex: String) {
+        if (!isIndexExisted(tag) || !isIndexExisted(newIndex)) return
+
+        val fragment = getFragment(tag)
+        navigate(newIndex)
+
         fragmentManager.beginTransaction().apply {
-            tag.let {
-                val fragment = fragmentMap[tag]!!
-                hide(fragment)
-                detach(fragment)
-            }
+            hide(fragment)
+            remove(fragment)
         }.commitNow()
+
         fragmentMap.remove(tag)
     }
 
