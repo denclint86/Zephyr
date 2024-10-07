@@ -23,12 +23,12 @@ abstract class ViewBindingFragment<VB : ViewDataBinding> : Fragment(),
     abstract fun VB.initBinding()
 
     override fun onAttach(context: Context) {
-        logI(TAG, "$TAG on", false)
+        logI(TAG, "$TAG onAttach", false)
         super.onAttach(context)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        logI(TAG, "$TAG on", false)
+        logI(TAG, "$TAG onCreate", false)
         super.onCreate(savedInstanceState)
     }
 
