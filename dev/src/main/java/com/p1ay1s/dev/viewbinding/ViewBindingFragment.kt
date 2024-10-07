@@ -1,11 +1,14 @@
 package com.p1ay1s.dev.viewbinding
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
+import com.p1ay1s.dev.base.TAG
+import com.p1ay1s.dev.log.logI
 
 abstract class ViewBindingFragment<VB : ViewDataBinding> : Fragment(),
     ViewBindingInterface<VB> {
@@ -19,23 +22,61 @@ abstract class ViewBindingFragment<VB : ViewDataBinding> : Fragment(),
      */
     abstract fun VB.initBinding()
 
+    override fun onAttach(context: Context) {
+        logI(TAG, TAG)
+        super.onAttach(context)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        logI(TAG, TAG)
+        super.onCreate(savedInstanceState)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        logI(TAG, TAG)
         _binding = getViewBinding(inflater, container)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        logI(TAG, TAG)
         super.onViewCreated(view, savedInstanceState)
         binding.initBinding()
     }
 
+    override fun onStart() {
+        logI(TAG, TAG)
+        super.onStart()
+    }
+
+    override fun onResume() {
+        logI(TAG, TAG)
+        super.onResume()
+    }
+
+    override fun onPause() {
+        logI(TAG, TAG)
+        super.onPause()
+    }
+
+    override fun onStop() {
+        logI(TAG, TAG)
+        super.onStop()
+    }
+
     override fun onDestroyView() {
+        logI(TAG, TAG)
         super.onDestroyView()
         _binding?.unbind()
         _binding = null
+    }
+
+    override fun onDestroy() {
+        logI(TAG, TAG)
+        super.onDestroy()
     }
 }

@@ -103,12 +103,15 @@ open class LoggerClass {
     protected val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
 
     // 出现未被捕获的错误时的处理方式
-    protected val loggerCrashHandler: ((Thread, Throwable) -> Unit) = { thread, throwable ->
+    open val loggerCrashHandler: ((Thread, Throwable) -> Unit) = { thread, throwable ->
         isCrashed = true
 
         val title = thread.name
         val detail = Log.getStackTraceString(throwable)
         val fullMsg = "at: ${title}\ndetails: $detail"
+
+        println(fullMsg)
+
         appendLog(getName(ERROR), "UncaughtException", fullMsg)
         writeToFile()
 
