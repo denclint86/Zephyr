@@ -47,18 +47,14 @@ class FragmentHost(
         indexChangedListener = listener
     }
 
-//     fun navigate(tag: Fragment) {
-//        fragmentMap.getKey(tag)?.let { switchToFragment(it) }
-//    }
-
     /**
      * 切换到某个 fragment
      *
      * 传入不存在的键直接退出函数
      */
-    fun navigate(tag: String) {
+    fun navigate(tag: String): Boolean {
         if (isIndexExisted(tag)) {
-            if (tag == currentIndex) return
+            if (tag == currentIndex) return false
 
             fragmentManager.beginTransaction().apply {
                 hide(getCurrentFragment())
@@ -67,6 +63,9 @@ class FragmentHost(
 
             lastIndex = currentIndex
             currentIndex = tag
+            return true
+        } else {
+            return false
         }
     }
 
@@ -90,18 +89,16 @@ class FragmentHost(
         }.commitNow()
     }
 
-//     fun remove(tag: Fragment, defaultIndex: String, switch: Boolean) =
-//        deleteFragment(fragmentMap.getKey(tag)!!, defaultIndex, switch)
-
-    fun pop(tag: String) {
-        lastIndex?.let { pop(tag, it) }
+    fun pop(tag: String): Boolean {
+        lastIndex?.let { return pop(tag, it) }
+        return false
     }
 
     /**
      * @param newIndex 移除后切换的索引
      */
-    fun pop(tag: String, newIndex: String) {
-        if (!isIndexExisted(tag) || !isIndexExisted(newIndex)) return
+    fun pop(tag: String, newIndex: String): Boolean {
+        if (!isIndexExisted(tag) || !isIndexExisted(newIndex)) return false
 
         val fragment = getFragment(tag)
         navigate(newIndex)
@@ -112,6 +109,7 @@ class FragmentHost(
         }.commitNow()
 
         fragmentMap.remove(tag)
+        return true
     }
 
     fun getCurrentFragment() = getFragment(currentIndex)
