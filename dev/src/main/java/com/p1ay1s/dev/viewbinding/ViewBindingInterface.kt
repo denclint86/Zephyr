@@ -8,10 +8,10 @@ import androidx.databinding.ViewDataBinding
 import java.lang.reflect.ParameterizedType
 
 /**
- * 功能 : 利用 java 反射获取 view binding 的类
+ * 功能 : 利用 java 反射获取 viewbinding 的类
  *
- * 由于需要获取 java class 所以封装成接口比较合适
- * 将实现打包成 jar 可能无法获取到 ViewBinding 类
+ * 已经用具体的 viewbinding 实现的类不能再被继承,
+ * 否则会由于找不到 viewbinding 而崩溃
  *
  * 取消了 try-catch , 有时候把异常捕捉起来反而误事
  */

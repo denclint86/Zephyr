@@ -8,6 +8,8 @@ import com.p1ay1s.dev.viewbinding.ViewBindingInterface
 
 /**
  * 功能: 显示一个禁止操作的界面, 可以用自定义布局
+ *
+ * @see ViewBindingInterface 注意事项
  */
 open class ViewBindingDialog<VB : ViewDataBinding>(context: Context) : AlertDialog(context),
     ViewBindingInterface<VB> {

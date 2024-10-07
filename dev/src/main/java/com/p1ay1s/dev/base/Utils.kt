@@ -6,12 +6,15 @@ import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
+import com.p1ay1s.dev.ui.FragmentHost
+import com.p1ay1s.dev.ui.FragmentHostView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -42,6 +45,24 @@ fun Activity.isPermissionGranted(name: String): Boolean = ContextCompat.checkSel
     this,
     name
 ) == PackageManager.PERMISSION_GRANTED
+
+/**
+ * 从 Fragment 获取 FragmentController 的扩展函数
+ */
+fun Fragment.findFragmentHost(): FragmentHost? {
+    var view = view
+    var parent = view?.parent
+
+    while (parent != null) {
+        if (parent is FragmentHostView) {
+            return parent.fragmentHost
+        }
+        view = parent as? View // as? 如果转换失败则变为 null
+        parent = view?.parent
+    }
+
+    return null
+}
 
 suspend fun toastSuspended(msg: String, length: Int = Toast.LENGTH_SHORT) =
     withContext(Dispatchers.Main) {

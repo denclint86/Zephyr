@@ -13,6 +13,8 @@ import com.p1ay1s.dev.viewbinding.ViewBindingInterface
  * @param D dataclass
  * @param C content 后面可能需要的内容
  * @param itemCallback 自行实现 YourCallback: DiffUtil.ItemCallback<YourBean>()
+ *
+ * @see ViewBindingInterface 注意事项
  */
 abstract class ViewBindingListAdapter<VB : ViewDataBinding, D, C>(
     itemCallback: DiffUtil.ItemCallback<D>

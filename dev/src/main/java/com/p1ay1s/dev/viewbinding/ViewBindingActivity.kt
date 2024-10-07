@@ -6,6 +6,9 @@ import androidx.databinding.ViewDataBinding
 import com.p1ay1s.dev.base.TAG
 import com.p1ay1s.dev.log.logI
 
+/**
+ * @see ViewBindingInterface 注意事项
+ */
 abstract class ViewBindingActivity<VB : ViewDataBinding> : AppCompatActivity(),
     ViewBindingInterface<VB> {
 

@@ -10,6 +10,9 @@ import androidx.fragment.app.Fragment
 import com.p1ay1s.dev.base.TAG
 import com.p1ay1s.dev.log.logI
 
+/**
+ * @see ViewBindingInterface 注意事项
+ */
 abstract class ViewBindingFragment<VB : ViewDataBinding> : Fragment(),
     ViewBindingInterface<VB> {
 
