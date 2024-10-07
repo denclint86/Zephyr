@@ -78,9 +78,11 @@ class FragmentHost(
         fragmentManager.beginTransaction().apply {
             fragmentMap[index] = fragment
             add(viewId, fragment, index)
+            if (show)
+                hide(getCurrentFragment())
+            else
+                hide(fragment)
         }.commitNow()
-
-        if (show) navigate(index)
     }
 
 //     fun remove(tag: Fragment, defaultIndex: String, switch: Boolean) =
