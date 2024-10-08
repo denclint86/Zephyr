@@ -36,8 +36,9 @@ class FragmentHost(
                 add(viewId, fragment, index)
                 hide(fragment)
             }
-            show(getCurrentFragment())
         }.commit()
+
+        show()
     }
 
     /**
@@ -48,18 +49,27 @@ class FragmentHost(
     }
 
     /**
+     * 重新显示当前的 fragment , 可以在某些情况下 fragment 消失后调用
+     */
+    fun show() {
+        navigate(currentIndex)
+    }
+
+    /**
      * 切换到某个 fragment
      *
      * 传入不存在的键直接退出函数
      */
     fun navigate(tag: String): Boolean {
         if (isIndexExisted(tag)) {
-            if (tag == currentIndex) return false
-
             fragmentManager.beginTransaction().apply {
                 hide(getCurrentFragment())
                 show(getFragment(tag))
             }.commitNow()
+
+            if (tag == currentIndex) {
+                return false
+            }
 
             lastIndex = currentIndex
             currentIndex = tag
@@ -113,6 +123,16 @@ class FragmentHost(
     }
 
     fun getCurrentFragment() = getFragment(currentIndex)
+
+    fun removeAll() {
+        fragmentManager.beginTransaction().apply {
+            fragmentMap.forEach { (index, fragment) ->
+                hide(fragment)
+                remove(fragment)
+                fragmentMap.remove(index)
+            }
+        }.commitNow()
+    }
 
     private fun getFragment(index: String?): Fragment {
         when {

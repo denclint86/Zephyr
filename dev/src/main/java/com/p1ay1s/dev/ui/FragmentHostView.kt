@@ -16,7 +16,7 @@ class FragmentHostView : FrameLayout {
     private var _fragmentHost: FragmentHost? = null
     val fragmentHost: FragmentHost
         get() = _fragmentHost
-            ?: throw IllegalStateException("have to call FragmentControllerView.init(...) first")
+            ?: throw IllegalStateException("have to call FragmentControllerView.init(manager, map) first")
 
     constructor(context: Context) : super(context)
 
@@ -28,7 +28,17 @@ class FragmentHostView : FrameLayout {
         defStyleAttr
     )
 
+    fun init(fragmentHost: FragmentHost) {
+        if (_fragmentHost != null)
+            _fragmentHost = fragmentHost
+    }
+
     fun init(fragmentManager: FragmentManager, fragmentMap: LinkedHashMap<String, Fragment>) {
-        _fragmentHost = FragmentHost(id, fragmentManager, fragmentMap)
+        if (_fragmentHost != null)
+            _fragmentHost = FragmentHost(id, fragmentManager, fragmentMap)
+    }
+
+    fun release() {
+        _fragmentHost?.removeAll()
     }
 }

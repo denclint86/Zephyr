@@ -31,6 +31,17 @@ val Fragment.TAG
 val ViewModel.TAG
     get() = this::class.simpleName!!
 
+fun AppCompatActivity.withPermission(
+    name: String = WRITE_EXTERNAL_STORAGE,
+    callback: (isGranted: Boolean) -> Unit
+) {
+    if (isPermissionGranted(name)) {
+        callback(true)
+    } else {
+        requestPermission(name, callback)
+    }
+}
+
 /**
  * @param name Manifest.permission.XXX
  */
