@@ -3,6 +3,7 @@ package com.p1ay1s.dev.ui
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 
 /**
@@ -27,7 +28,15 @@ class FragmentHostView : FrameLayout {
         defStyleAttr
     )
 
-    fun bindFragmentHost(fragmentHost: FragmentHost, fragmentManager: FragmentManager) {
+    fun create(
+        fragmentManager: FragmentManager,
+        map: LinkedHashMap<String, Fragment>
+    ): FragmentHost {
+        _fragmentHost = FragmentHost(id, fragmentManager, map)
+        return fragmentHost
+    }
+
+    fun restore(fragmentHost: FragmentHost, fragmentManager: FragmentManager) {
         if (_fragmentHost == null)
             _fragmentHost = fragmentHost
         _fragmentHost?.fragmentManager = fragmentManager
