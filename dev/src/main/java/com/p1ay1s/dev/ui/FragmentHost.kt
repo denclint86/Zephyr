@@ -7,12 +7,12 @@ import com.p1ay1s.dev.base.throwException
 /**
  * 基于 fragmentManager 的工具类
  *
- * 仿照 NavController 的部分功能实现
+ * 仿照 NavController 的部分功能实现,
  * 提供更友好的 fragment 的生命周期管理
  */
 class FragmentHost(
     private val viewId: Int,
-    private var fragmentManager: FragmentManager,
+    var fragmentManager: FragmentManager,
     private var fragmentMap: LinkedHashMap<String, Fragment> // linkedHashMap 可以按 item 添加顺序排列
 ) {
     /**
@@ -38,7 +38,15 @@ class FragmentHost(
      */
     init {
         currentIndex = fragmentMap.keys.first()
+        addAll()
+        fragmentManager.executePendingTransactions()
+    }
 
+    /**
+     * 将 map 的全部键值加入到 fragmentManager
+     */
+    fun addAll(map: LinkedHashMap<String, Fragment>? = null) {
+        map?.let { fragmentMap.putAll(it) }
         fragmentManager.beginTransaction().apply {
             setReorderingAllowed(true)
             fragmentMap.forEach { (index, fragment) ->
@@ -46,8 +54,6 @@ class FragmentHost(
                 hide(fragment)
             }
         }.commit()
-
-        show()
     }
 
     /**
@@ -58,30 +64,38 @@ class FragmentHost(
     }
 
     /**
-     * 重新显示当前的 fragment , 可以在某些情况下 fragment 消失后调用
+     * 显示当前的 fragment
      */
     fun show() {
-        navigate(currentIndex)
+        fragmentManager.beginTransaction().apply {
+            show(getCurrentFragment())
+        }.commitNow()
+    }
+
+    /**
+     * 隐藏当前的 fragment
+     */
+    fun hide() {
+        fragmentManager.beginTransaction().apply {
+            hide(getCurrentFragment())
+        }.commitNow()
     }
 
     /**
      * 切换到某个 fragment
      *
-     * @return 是否切换到了目标 fragment, 当前索引已经是目标索引时返回假
+     * @return 是否切换到了目标 fragment,
+     * 当前索引已经是目标索引时返回假.
      * 传入不存在的键直接退出函数
      */
     fun navigate(tag: String): Boolean {
         if (isIndexExisted(tag)) {
+            if (tag == currentIndex) return false
+
             fragmentManager.beginTransaction().apply {
-                if (tag != currentIndex) {
-                    hide(getCurrentFragment())
-                }
+                hide(getCurrentFragment())
                 show(getFragment(tag))
             }.commitNow()
-
-            if (tag == currentIndex) {
-                return false
-            }
 
             lastIndex = currentIndex
             currentIndex = tag
@@ -94,7 +108,7 @@ class FragmentHost(
     /**
      * 添加 fragment
      *
-     * @param show 是否显示添加的 fragment
+     * @param show 是否显示添加的 fragment,
      * 如果使用了已添加的索引则会覆盖对应的 fragment
      */
     fun add(index: String, fragment: Fragment, show: Boolean = true) {

@@ -3,7 +3,6 @@ package com.p1ay1s.dev.ui
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 
 /**
@@ -16,7 +15,7 @@ class FragmentHostView : FrameLayout {
     private var _fragmentHost: FragmentHost? = null
     val fragmentHost: FragmentHost
         get() = _fragmentHost
-            ?: throw IllegalStateException("have to call FragmentControllerView.init(manager, map) first")
+            ?: throw IllegalStateException("have to bind FragmentHost first")
 
     constructor(context: Context) : super(context)
 
@@ -28,20 +27,14 @@ class FragmentHostView : FrameLayout {
         defStyleAttr
     )
 
-    /**
-     * 不可用 fragmentManager 已销毁的对象否则抛出异常
-     */
-    fun init(fragmentHost: FragmentHost) {
+    fun bindFragmentHost(fragmentHost: FragmentHost, fragmentManager: FragmentManager) {
         if (_fragmentHost == null)
             _fragmentHost = fragmentHost
-    }
-
-    fun init(fragmentManager: FragmentManager, fragmentMap: LinkedHashMap<String, Fragment>) {
-        if (_fragmentHost == null)
-            _fragmentHost = FragmentHost(id, fragmentManager, fragmentMap)
+        _fragmentHost?.fragmentManager = fragmentManager
     }
 
     fun release() {
         _fragmentHost?.removeAll()
+        _fragmentHost = null
     }
 }
