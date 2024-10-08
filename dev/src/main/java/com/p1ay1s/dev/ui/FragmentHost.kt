@@ -4,19 +4,27 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.p1ay1s.dev.base.throwException
 
+/**
+ * 基于 fragmentManager 的工具类
+ *
+ * 仿照 NavController 的部分功能实现
+ * 提供更友好的 fragment 的生命周期管理
+ */
 class FragmentHost(
     private val viewId: Int,
     private var fragmentManager: FragmentManager,
     private var fragmentMap: LinkedHashMap<String, Fragment> // linkedHashMap 可以按 item 添加顺序排列
 ) {
-
-    interface OnFragmentIndexChangedListener { // 用于通知索引改变
+    /**
+     * 用于通知索引改变的监听器
+     */
+    interface OnFragmentIndexChangedListener {
         fun onFragmentIndexChanged(index: String)
     }
 
     private var lastIndex: String? = null
     private var currentIndex: String = fragmentMap.keys.first()
-        set(value) {
+        set(value) { // 赋值前通知索引改变
             indexChangedListener?.onFragmentIndexChanged(value)
             field = value
         }
@@ -25,7 +33,8 @@ class FragmentHost(
         null
 
     /**
-     * 初始化索引并添加全部 fragment , 最后显示第一个 fragment
+     * 初始化索引并添加全部 fragment,
+     * 最后显示第一个添加的 fragment
      */
     init {
         currentIndex = fragmentMap.keys.first()
@@ -42,7 +51,7 @@ class FragmentHost(
     }
 
     /**
-     * 监听 fragment 的索引
+     * 设置加索引监听器
      */
     fun setOnFragmentIndexChangeListener(listener: OnFragmentIndexChangedListener) {
         indexChangedListener = listener
@@ -58,12 +67,15 @@ class FragmentHost(
     /**
      * 切换到某个 fragment
      *
+     * @return 是否切换到了目标 fragment, 当前索引已经是目标索引时返回假
      * 传入不存在的键直接退出函数
      */
     fun navigate(tag: String): Boolean {
         if (isIndexExisted(tag)) {
             fragmentManager.beginTransaction().apply {
-                hide(getCurrentFragment())
+                if (tag != currentIndex) {
+                    hide(getCurrentFragment())
+                }
                 show(getFragment(tag))
             }.commitNow()
 
@@ -83,10 +95,18 @@ class FragmentHost(
      * 添加 fragment
      *
      * @param show 是否显示添加的 fragment
-     * 如果使用了已添加的键则会覆盖对应的 fragment
+     * 如果使用了已添加的索引则会覆盖对应的 fragment
      */
     fun add(index: String, fragment: Fragment, show: Boolean = true) {
         fragmentManager.beginTransaction().apply {
+            if (isIndexExisted(index)) {
+                runCatching {
+                    val oldFragment = getFragment(index)
+                    hide(oldFragment)
+                    remove(oldFragment)
+                }
+            }
+
             fragmentMap[index] = fragment
             add(viewId, fragment, index)
             if (show) {
@@ -99,12 +119,17 @@ class FragmentHost(
         }.commitNow()
     }
 
+    /**
+     * 移除当前显示的 fragment
+     */
     fun pop(tag: String): Boolean {
         lastIndex?.let { return pop(tag, it) }
         return false
     }
 
     /**
+     * 移除指定的 fragment
+     *
      * @param newIndex 移除后切换的索引
      */
     fun pop(tag: String, newIndex: String): Boolean {

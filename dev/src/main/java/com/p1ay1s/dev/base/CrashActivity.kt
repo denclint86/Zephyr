@@ -13,11 +13,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
+ * 用于展示崩溃情况的 activity
  * 必须开启 databinding
  *
  * 直接用您的 activity ,或在项目中注册您继承的子类并给 Logger.crashActivity 赋值 YourChildActivity::java.class
  */
-abstract class CrashActivity : Activity(), ActivityPreferences.TwoBackPressToExitListener {
+abstract class CrashActivity : Activity(), ActivityPreferences.TwoClicksListener {
     protected var backPressTimer: Job? = null
     protected var oneMoreToFinish = false
 
@@ -43,10 +44,10 @@ abstract class CrashActivity : Activity(), ActivityPreferences.TwoBackPressToExi
     @SuppressLint("MissingSuperCall")
     @CallSuper
     override fun onBackPressed() {
-        twoBackPressToExit()
+        twoClicksToExit()
     }
 
-    override fun twoBackPressToExit() {
+    override fun twoClicksToExit() {
         if (oneMoreToFinish) {
             finishAffinity()
         } else {

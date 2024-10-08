@@ -10,6 +10,10 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 
+/**
+ * 可以设置圆角方形、长方形、圆形的图片,
+ * 可以选择渐入动画以及缓存
+ */
 object ImageSetter {
     private const val RADIUS = 25
 

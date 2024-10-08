@@ -6,13 +6,12 @@ import android.content.Context
 abstract class App : Application() {
 
     /**
-     * 您需要为 Logger 设置:
+     * 您需要为设置以下代码来启用 Logger:
      *
-     * example:
      * Logger.crashActivity = YourCrashActivity::class.java
-     * startLogger(applicationContext, com.p1ay1s.dev.log.ERROR)
+     * startLogger(context, com.p1ay1s.dev.log.ERROR)
      */
-    abstract fun whenOnCreate(appContext: Context)
+    abstract fun whenOnCreate(context: Context)
 
     override fun onCreate() {
         super.onCreate()

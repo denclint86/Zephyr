@@ -4,6 +4,9 @@ import android.content.Context
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
+/**
+ * 具有预加载功能的 layoutManager 子类
+ */
 open class PreloadLayoutManager(
     context: Context,
     orientation: Int,

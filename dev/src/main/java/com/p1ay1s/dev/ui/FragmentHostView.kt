@@ -9,8 +9,8 @@ import androidx.fragment.app.FragmentManager
 /**
  * 具有 fragment 管理能力的 view
  *
- * 感觉 navController 还是有很多不适合我的地方,
- * 遂自己实现一个
+ * 如果你苦于 navController 的重走生命周期问题,
+ * 但又不想自己写子类可以用这个
  */
 class FragmentHostView : FrameLayout {
     private var _fragmentHost: FragmentHost? = null
@@ -28,6 +28,9 @@ class FragmentHostView : FrameLayout {
         defStyleAttr
     )
 
+    /**
+     * 不可用 fragmentManager 已销毁的对象否则抛出异常
+     */
     fun init(fragmentHost: FragmentHost) {
         if (_fragmentHost == null)
             _fragmentHost = fragmentHost

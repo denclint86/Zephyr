@@ -16,9 +16,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * 可以自动切换图片的 view, 点击事件可以选择 suspend 或者直接在主线程执行
+ * 可以自动切换图片的 view,
+ * 点击事件可以选择 suspend 或者直接在主线程执行,
+ * 有波纹点击效果
  *
- * 限制宽高为其中的最小值
+ * 限制宽高为其中的最小值以使得 view 是正方形
  */
 open class ChangingImageButton @JvmOverloads constructor(
     context: Context,
@@ -44,6 +46,9 @@ open class ChangingImageButton @JvmOverloads constructor(
         )
     }
 
+    /**
+     * 两个监听器的设置会相互覆盖
+     */
     fun setOnSuspendClickListener(listener: suspend () -> Status) {
         mListener = listener
         super.setOnClickListener {
@@ -72,11 +77,14 @@ open class ChangingImageButton @JvmOverloads constructor(
 
     protected fun handleClick() {
         if (mListener == null) return
-        job?.cancel()
-        job = viewScope.launch {
-            val result = mListener!!()
-            withContext(Dispatchers.Main) {
-                switchImage(result)
+        viewScope.launch {
+            job?.cancel()
+            job?.join()
+            job = launch(Dispatchers.IO) {
+                val result = mListener!!()
+                withContext(Dispatchers.Main) {
+                    switchImage(result)
+                }
             }
         }
     }
@@ -86,6 +94,9 @@ open class ChangingImageButton @JvmOverloads constructor(
         super.onDraw(canvas)
     }
 
+    /**
+     * 设置等宽高
+     */
     private fun cutView() {
         layoutParams.run {
             width = minOf(width, height)

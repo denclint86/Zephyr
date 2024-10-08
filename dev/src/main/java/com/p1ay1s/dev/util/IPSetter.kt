@@ -16,6 +16,7 @@ import com.p1ay1s.dev.util.IPSetter.setIp
 import java.net.Inet4Address
 import java.net.NetworkInterface
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 var onNetworkConnectChangedCallback: () -> Unit = { setIp() }
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)

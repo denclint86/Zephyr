@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit
 const val ON_FAILURE_CODE = -1
 
 /**
- * 和网络请求有关的类
+ * 网络请求的封装
  */
 object ServiceBuilder {
     private interface PingService {
