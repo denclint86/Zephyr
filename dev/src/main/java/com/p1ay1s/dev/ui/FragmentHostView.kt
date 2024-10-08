@@ -29,12 +29,12 @@ class FragmentHostView : FrameLayout {
     )
 
     fun init(fragmentHost: FragmentHost) {
-        if (_fragmentHost != null)
+        if (_fragmentHost == null)
             _fragmentHost = fragmentHost
     }
 
     fun init(fragmentManager: FragmentManager, fragmentMap: LinkedHashMap<String, Fragment>) {
-        if (_fragmentHost != null)
+        if (_fragmentHost == null)
             _fragmentHost = FragmentHost(id, fragmentManager, fragmentMap)
     }
 
