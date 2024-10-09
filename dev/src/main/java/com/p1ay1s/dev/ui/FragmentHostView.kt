@@ -40,6 +40,7 @@ class FragmentHostView : FrameLayout {
         if (_fragmentHost == null)
             _fragmentHost = fragmentHost
         _fragmentHost?.fragmentManager = fragmentManager
+        _fragmentHost?.addAll()
     }
 
     fun release() {
