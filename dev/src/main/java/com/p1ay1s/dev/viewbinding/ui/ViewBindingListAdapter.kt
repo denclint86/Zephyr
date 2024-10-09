@@ -29,7 +29,7 @@ abstract class ViewBindingListAdapter<VB : ViewDataBinding, D, C>(
         }
     }
 
-    protected val collector = object : ContentCollector<D, C?>(3) {}
+//    protected val collector = object : ContentCollector<D, C?>(3) {}
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return with(getViewBinding(LayoutInflater.from(parent.context), parent)) {
@@ -54,22 +54,23 @@ abstract class ViewBindingListAdapter<VB : ViewDataBinding, D, C>(
         }
     }
 
-    abstract class ContentCollector<KEY, VALUE>(val max: Int = 9) {
-        /**
-         * 缓存若干内容, 并且自动删除最早的内容
-         */
-        private val cache = object : LinkedHashMap<KEY, VALUE>(max, 0.75f, true) {
-            override fun removeEldestEntry(eldest: Map.Entry<KEY, VALUE>): Boolean {
-                return size > max
-            }
-        }
-
-        fun get(key: KEY): VALUE? {
-            return cache[key]
-        }
-
-        fun put(key: KEY, value: VALUE) {
-            cache[key] = value
-        }
-    }
+//
+//    abstract class ContentCollector<KEY, VALUE>(val max: Int = 9) {
+//        /**
+//         * 缓存若干内容, 并且自动删除最早的内容
+//         */
+//        private val cache = object : LinkedHashMap<KEY, VALUE>(max, 0.75f, true) {
+//            override fun removeEldestEntry(eldest: Map.Entry<KEY, VALUE>): Boolean {
+//                return size > max
+//            }
+//        }
+//
+//        fun get(key: KEY): VALUE? {
+//            return cache[key]
+//        }
+//
+//        fun put(key: KEY, value: VALUE) {
+//            cache[key] = value
+//        }
+//    }
 }

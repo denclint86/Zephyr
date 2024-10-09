@@ -31,14 +31,26 @@ object ServiceBuilder {
     const val FAILED = "failed "
     const val TIME_OUT = "time out "
 
-    private const val TIMEOUT_SET = 15L
+    private var connectTimeoutSet = 7L
+    private const val READ_TIMEOUT_SET = 15L
 
-    private val client = OkHttpClient.Builder()
-        .readTimeout(TIMEOUT_SET, TimeUnit.SECONDS)
-        .connectTimeout(TIMEOUT_SET, TimeUnit.SECONDS)
-        .build()
+    private val client: OkHttpClient by lazy {
+        OkHttpClient.Builder()
+            .readTimeout(READ_TIMEOUT_SET, TimeUnit.SECONDS)
+            .connectTimeout(connectTimeoutSet, TimeUnit.SECONDS)
+            .build()
+    }
 
-    private val retrofit = retrofitBuilder(appBaseUrl)
+    private val retrofit: Retrofit by lazy {
+        retrofitBuilder(appBaseUrl)
+    }
+
+    /**
+     * 在第一次获取 retrofit 对象之前调用即可设置
+     */
+    fun setTimeout(time: Long) {
+        connectTimeoutSet = time
+    }
 
     /**
      * 创建并返回一个 retrofit 实例
@@ -118,7 +130,7 @@ object ServiceBuilder {
         try {
             with(call.awaitResponse()) {
                 when {
-                    isSuccessful && body() != null ->onSuccess(body()!!) // 成功
+                    isSuccessful && body() != null -> onSuccess(body()!!) // 成功
 
                     isSuccessful && body() == null ->
                         onError(

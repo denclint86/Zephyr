@@ -134,14 +134,6 @@ class FragmentHost(
     }
 
     /**
-     * 移除当前显示的 fragment
-     */
-    fun pop(tag: String): Boolean {
-        lastIndex?.let { return pop(tag, it) }
-        return false
-    }
-
-    /**
      * 移除指定的 fragment
      *
      * @param newIndex 移除后切换的索引
