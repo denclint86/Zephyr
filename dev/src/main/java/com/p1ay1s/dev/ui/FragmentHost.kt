@@ -105,6 +105,25 @@ class FragmentHost(
         }
     }
 
+    // TODO 不知道是不是仅在单次生效
+    fun navigate(tag: String, enter: Int, exit: Int): Boolean {
+        if (isIndexExisted(tag)) {
+            if (tag == currentIndex) return false
+
+            fragmentManager.beginTransaction().apply {
+                setCustomAnimations(enter, exit)
+                hide(getCurrentFragment())
+                show(getFragment(tag))
+            }.commitNow()
+
+            lastIndex = currentIndex
+            currentIndex = tag
+            return true
+        } else {
+            return false
+        }
+    }
+
     /**
      * 添加 fragment
      *
@@ -122,6 +141,30 @@ class FragmentHost(
             }
 
             fragmentMap[index] = fragment
+            add(viewId, fragment, index)
+            if (show) {
+                hide(getCurrentFragment())
+
+                lastIndex = currentIndex
+                currentIndex = index
+            } else
+                hide(fragment)
+        }.commitNow()
+    }
+
+    // TODO
+    fun add(index: String, fragment: Fragment, show: Boolean, enter: Int, exit: Int) {
+        fragmentManager.beginTransaction().apply {
+            if (isIndexExisted(index)) {
+                runCatching {
+                    val oldFragment = getFragment(index)
+                    hide(oldFragment)
+                    remove(oldFragment)
+                }
+            }
+
+            fragmentMap[index] = fragment
+            setCustomAnimations(enter, exit)
             add(viewId, fragment, index)
             if (show) {
                 hide(getCurrentFragment())
