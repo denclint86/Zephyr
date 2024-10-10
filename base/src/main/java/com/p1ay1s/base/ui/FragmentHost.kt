@@ -51,7 +51,7 @@ class FragmentHost(
         fragmentManager.beginTransaction().apply {
             setReorderingAllowed(true)
             fragmentMap.forEach { (index, fragment) ->
-                add(viewId, fragment, index)
+                this.add(viewId, fragment, index.toString())
                 hide(fragment)
             }
         }.commit()
@@ -143,7 +143,7 @@ class FragmentHost(
             }
 
             fragmentMap[index] = fragment
-            add(viewId, fragment, index)
+            this.add(viewId, fragment, index.toString()) // 就尼玛无语, 在这无限递归了
             if (show) {
                 hide(getCurrentFragment())
 
