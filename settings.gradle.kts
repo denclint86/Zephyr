@@ -29,6 +29,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Zephyr"
-include(":dev")
-include(":extensions")
-//include(":app")
+include(":base")
+include(":sealedViewBindingImpl")
+include(":util")

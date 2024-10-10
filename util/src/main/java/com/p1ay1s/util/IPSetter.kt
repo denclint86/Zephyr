@@ -8,14 +8,18 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.NetworkInfo
 import android.net.wifi.WifiManager
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.p1ay1s.base.appContext
 import com.p1ay1s.base.appIpAddress
 import com.p1ay1s.util.IPSetter.setIp
 import java.net.Inet4Address
 import java.net.NetworkInterface
 
+@RequiresApi(Build.VERSION_CODES.O)
 var onNetworkConnectChangedCallback: () -> Unit = { setIp() }
 
+@RequiresApi(Build.VERSION_CODES.O)
 object IPSetter {
     private val TAG = this::class.simpleName!!
 
