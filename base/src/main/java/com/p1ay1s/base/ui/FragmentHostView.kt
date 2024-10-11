@@ -30,7 +30,7 @@ class FragmentHostView : FrameLayout {
 
     fun create(
         fragmentManager: FragmentManager,
-        map: LinkedHashMap<Int, Fragment>
+        map: LinkedHashMap<Int, Class<out Fragment>>
     ): FragmentHost {
         _fragmentHost = FragmentHost(id, fragmentManager, map)
         return fragmentHost

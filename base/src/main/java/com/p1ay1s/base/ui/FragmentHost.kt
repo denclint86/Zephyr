@@ -12,16 +12,16 @@ import com.p1ay1s.base.extension.throwException
  *
  * 索引改用 Int , 建议用魔法变量访问
  */
-class FragmentHost(
-    private val viewId: Int,
-    var fragmentManager: FragmentManager,
-    private var fragmentMap: LinkedHashMap<Int, Fragment> // linkedHashMap 可以按 item 添加顺序排列
-) {
 //class FragmentHost(
 //    private val viewId: Int,
 //    var fragmentManager: FragmentManager,
-//    private var fragmentMap: LinkedHashMap<Int,  Class<out Fragment>> // linkedHashMap 可以按 item 添加顺序排列
+//    private var fragmentMap: LinkedHashMap<Int, Fragment> // linkedHashMap 可以按 item 添加顺序排列
 //) {
+class FragmentHost(
+    private val viewId: Int,
+    var fragmentManager: FragmentManager,
+    private var fragmentMap: LinkedHashMap<Int, Class<out Fragment>> // linkedHashMap 可以按 item 添加顺序排列
+) {
 
     /**
      * 用于通知索引改变的监听器
@@ -45,21 +45,22 @@ class FragmentHost(
      */
     init {
         addAll()
-        fragmentManager.executePendingTransactions()
     }
 
     /**
      * 将 map 的全部键值加入到 fragmentManager
      */
-    fun addAll(map: LinkedHashMap<Int, Fragment>? = null) {
+    fun addAll(map: LinkedHashMap<Int, Class<out Fragment>>? = null) {
         map?.let { fragmentMap.putAll(it) }
         fragmentManager.beginTransaction().apply {
             setReorderingAllowed(true)
             fragmentMap.forEach { (index, fragment) ->
-                this.add(viewId, fragment, index.toString())
-                hide(fragment)
+                val f = fragment.getDeclaredConstructor().newInstance()
+                this.add(viewId, f, index.toString())
+                this.hide(f)
             }
         }.commit()
+        fragmentManager.executePendingTransactions()
     }
 
     /**
@@ -73,6 +74,10 @@ class FragmentHost(
         indexChangedListener = null
     }
 
+    fun findFragment(tag: Int): Fragment? {
+        return fragmentManager.findFragmentByTag(tag.toString())
+    }
+
     /**
      * 显示当前的 fragment
      *
@@ -82,7 +87,8 @@ class FragmentHost(
         fragmentManager.beginTransaction().apply {
             setCustomAnimations(enter, 0)
             show(getCurrentFragment())
-        }.commitNow()
+        }.commit()
+        fragmentManager.executePendingTransactions()
     }
 
     /**
@@ -94,7 +100,8 @@ class FragmentHost(
         fragmentManager.beginTransaction().apply {
             setCustomAnimations(0, exit)
             hide(getCurrentFragment())
-        }.commitNow()
+        }.commit()
+        fragmentManager.executePendingTransactions()
     }
 
     /**
@@ -115,8 +122,8 @@ class FragmentHost(
                 setCustomAnimations(enter, exit)
                 hide(getCurrentFragment())
                 show(getFragment(tag))
-            }.commitNow()
-
+            }.commit()
+            fragmentManager.executePendingTransactions()
             currentIndex = tag
             return true
         } else {
@@ -130,7 +137,7 @@ class FragmentHost(
      * @param enter 进入动画
      * @param exit 退出动画
      */
-    fun add(index: Int, fragment: Fragment, enter: Int = 0, exit: Int = 0) {
+    fun add(index: Int, fragment: Class<out Fragment>, enter: Int = 0, exit: Int = 0) {
         add(index, fragment, false)
         navigate(index, enter, exit)
     }
@@ -141,7 +148,7 @@ class FragmentHost(
      * @param show 是否显示添加的 fragment,
      * 如果使用了已添加的索引则会覆盖对应的 fragment
      */
-    fun add(index: Int, fragment: Fragment, show: Boolean) {
+    fun add(index: Int, fragment: Class<out Fragment>, show: Boolean) {
         fragmentManager.beginTransaction().apply {
             if (isIndexExisted(index)) {
                 runCatching {
@@ -152,14 +159,16 @@ class FragmentHost(
             }
 
             fragmentMap[index] = fragment
-            this.add(viewId, fragment, index.toString()) // 就尼玛无语, 在这无限递归了
+            val f = fragment.getDeclaredConstructor().newInstance()
+            this.add(viewId, f, index.toString()) // 就尼玛无语, 在这无限递归了
             if (show) {
                 hide(getCurrentFragment())
 
                 currentIndex = index
             } else
-                hide(fragment)
-        }.commitNow()
+                hide(f)
+        }.commit()
+        fragmentManager.executePendingTransactions()
     }
 
     /**
@@ -172,7 +181,8 @@ class FragmentHost(
         fragmentManager.beginTransaction().apply {
             hide(fragment)
             remove(fragment)
-        }.commitNow()
+        }.commit()
+        fragmentManager.executePendingTransactions()
 
         fragmentMap.remove(tag)
         return true
@@ -196,17 +206,19 @@ class FragmentHost(
     fun removeAll() {
         fragmentManager.beginTransaction().apply {
             fragmentMap.forEach { (index, fragment) ->
-                hide(fragment)
-                remove(fragment)
+                findFragment(index)?.let { this.hide(it) }
+                findFragment(index)?.let { this.remove(it) }
                 fragmentMap.remove(index)
             }
-        }.commitNow()
+        }.commit()
+        fragmentManager.executePendingTransactions()
     }
 
     private fun getFragment(index: Int): Fragment {
         if (!isIndexExisted(index))
             throwException("try to get a fragment with a not existed key")
-        return fragmentMap[index]!!
+        val f = findFragment(index) ?: fragmentMap[index]!!.getDeclaredConstructor().newInstance()
+        return f
     }
 
     private fun isIndexExisted(tag: Int): Boolean {
