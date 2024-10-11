@@ -17,6 +17,11 @@ class FragmentHost(
     var fragmentManager: FragmentManager,
     private var fragmentMap: LinkedHashMap<Int, Fragment> // linkedHashMap 可以按 item 添加顺序排列
 ) {
+//class FragmentHost(
+//    private val viewId: Int,
+//    var fragmentManager: FragmentManager,
+//    private var fragmentMap: LinkedHashMap<Int,  Class<out Fragment>> // linkedHashMap 可以按 item 添加顺序排列
+//) {
 
     /**
      * 用于通知索引改变的监听器
@@ -60,8 +65,12 @@ class FragmentHost(
     /**
      * 设置加索引监听器
      */
-    fun setOnFragmentIndexChangeListener(listener: OnIndexChangeListener) {
+    fun setOnIndexChangeListener(listener: OnIndexChangeListener) {
         indexChangedListener = listener
+    }
+
+    fun removeOnIndexChangeListener() {
+        indexChangedListener = null
     }
 
     /**

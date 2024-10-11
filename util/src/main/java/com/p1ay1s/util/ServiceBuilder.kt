@@ -24,13 +24,6 @@ object ServiceBuilder {
         fun ping(): Call<Unit>
     }
 
-    val TAG = this::class.simpleName!!
-
-    const val LOADING = "loading "
-    const val SUCCESS = "success "
-    const val FAILED = "failed "
-    const val TIME_OUT = "time out "
-
     private var connectTimeoutSet = 7L
     private const val READ_TIMEOUT_SET = 15L
 
@@ -89,13 +82,13 @@ object ServiceBuilder {
     /**
      * 在 model 层确定 T 的类型，进一步回调给 viewModel 层
      *
-     * @param onSuccess 包含返回体
-     * @param onError 包含状态码以及信息
+     * @param onSuccess 包含返回体,
+     * @param onError 包含状态码(可为2xx! 网络错误时为 null )以及信息
      */
     inline fun <reified T> requestEnqueue(
         call: Call<T>,
         crossinline onSuccess: (data: T) -> Unit,
-        crossinline onError: ((code: Int, msg: String) -> Unit)
+        crossinline onError: ((code: Int?, msg: String) -> Unit)
     ) = call.enqueue(object : Callback<T> {
         val url = call.request().url().toString()
 
@@ -104,23 +97,26 @@ object ServiceBuilder {
                 when {
                     isSuccessful && body() != null -> onSuccess(body()!!) // 成功
 
-                    isSuccessful && body() == null ->
-                        onError(
-                            ON_FAILURE_CODE,
-                            "connection timeout"
-                        ) // 超时
-
-                    else -> onError(code(), message()) // 其他失败情况
+                    else -> onError(code(), message() ?: "Unknown error") // 其他情况当作失败, 状态码也可以是 2xx
                 }
             }
         }
 
+        /**
+         * 完全不用额外的判断, 就是连接失败
+         */
         override fun onFailure(call: Call<T>, t: Throwable) {
             t.printStackTrace()
-            onError(ON_FAILURE_CODE, t.message ?: "Unknown error")
+            onError(null, t.message ?: "Unknown error")
         }
     })
 
+    /**
+     * 在 model 层确定 T 的类型，进一步回调给 viewModel 层
+     *
+     * @param onSuccess 包含返回体,
+     * @param onError 包含状态码(可为2xx! 网络错误时为 null )以及信息
+     */
     suspend inline fun <reified T> requestExecute(
         call: Call<T>,
         crossinline onSuccess: (data: T) -> Unit,
@@ -132,13 +128,7 @@ object ServiceBuilder {
                 when {
                     isSuccessful && body() != null -> onSuccess(body()!!) // 成功
 
-                    isSuccessful && body() == null ->
-                        onError(
-                            ON_FAILURE_CODE,
-                            "connection timeout"
-                        ) // 超时
-
-                    else -> onError(code(), message()) // 其他失败情况
+                    else -> onError(code(), message() ?: "Unknown error") // 其他失败情况
                 }
             }
         } catch (t: Throwable) {
