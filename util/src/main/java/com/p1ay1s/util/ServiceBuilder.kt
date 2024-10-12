@@ -1,6 +1,8 @@
 package com.p1ay1s.util
 
 import com.p1ay1s.base.appBaseUrl
+import com.p1ay1s.base.log.logD
+import com.p1ay1s.base.log.logE
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -13,6 +15,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import java.util.concurrent.TimeUnit
 
+@Deprecated("failure code becomes 'null'")
 const val ON_FAILURE_CODE = -1
 
 /**
@@ -23,6 +26,9 @@ object ServiceBuilder {
         @GET("/")
         fun ping(): Call<Unit>
     }
+
+    const val TAG = "ServiceBuilder"
+    var enableLogger = false
 
     private var connectTimeoutSet = 7L
     private const val READ_TIMEOUT_SET = 15L
@@ -95,9 +101,15 @@ object ServiceBuilder {
         override fun onResponse(call: Call<T>, response: Response<T>) {
             with(response) {
                 when {
-                    isSuccessful && body() != null -> onSuccess(body()!!) // 成功
+                    isSuccessful && body() != null -> {
+                        if (enableLogger) logD(TAG, "success: $url")
+                        onSuccess(body()!!)
+                    } // 成功
 
-                    else -> onError(code(), message() ?: "Unknown error") // 其他情况当作失败, 状态码也可以是 2xx
+                    else -> {
+                        if (enableLogger) logE(TAG, "failed at: $url")
+                        onError(code(), message() ?: "Unknown error")
+                    } // 其他情况当作失败, 状态码也可以是 2xx
                 }
             }
         }
@@ -107,6 +119,7 @@ object ServiceBuilder {
          */
         override fun onFailure(call: Call<T>, t: Throwable) {
             t.printStackTrace()
+            if (enableLogger) logE(TAG, "failed at: $url")
             onError(null, t.message ?: "Unknown error")
         }
     })
@@ -120,20 +133,27 @@ object ServiceBuilder {
     suspend inline fun <reified T> requestExecute(
         call: Call<T>,
         crossinline onSuccess: (data: T) -> Unit,
-        crossinline onError: ((code: Int, msg: String) -> Unit)
+        crossinline onError: ((code: Int?, msg: String) -> Unit)
     ) = withContext(Dispatchers.IO) {
         val url = call.request().url().toString()
         try {
             with(call.awaitResponse()) {
                 when {
-                    isSuccessful && body() != null -> onSuccess(body()!!) // 成功
+                    isSuccessful && body() != null -> {
+                        if (enableLogger) logD(TAG, "success: $url")
+                        onSuccess(body()!!)
+                    }// 成功
 
-                    else -> onError(code(), message() ?: "Unknown error") // 其他失败情况
+                    else -> {
+                        if (enableLogger) logE(TAG, "failed at: $url")
+                        onError(code(), message() ?: "Unknown error")
+                    }// 其他失败情况
                 }
             }
         } catch (t: Throwable) {
             t.printStackTrace()
-            onError(ON_FAILURE_CODE, t.message ?: "Unknown error")
+            if (enableLogger) logE(TAG, "failed at: $url")
+            onError(null, t.message ?: "Unknown error")
         }
     }
 }

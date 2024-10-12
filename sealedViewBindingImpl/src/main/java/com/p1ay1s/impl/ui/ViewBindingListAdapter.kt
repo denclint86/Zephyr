@@ -21,11 +21,11 @@ abstract class ViewBindingListAdapter<VB : ViewDataBinding, D, C>(
 ) : ListAdapter<D, ViewBindingListAdapter<VB, D, C>.ViewHolder>(itemCallback),
     ViewBindingInterface<VB> {
 
-    protected lateinit var mBinding: VB
+    protected lateinit var binding: VB
 
     inner class ViewHolder(val binding: VB) : RecyclerView.ViewHolder(binding.root) {
         init {
-            mBinding = binding
+            this@ViewBindingListAdapter.binding = binding
         }
     }
 

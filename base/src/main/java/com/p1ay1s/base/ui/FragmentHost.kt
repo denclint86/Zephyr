@@ -12,12 +12,7 @@ import com.p1ay1s.base.extension.throwException
  *
  * 索引改用 Int , 建议用魔法变量访问
  */
-//class FragmentHost(
-//    private val viewId: Int,
-//    var fragmentManager: FragmentManager,
-//    private var fragmentMap: LinkedHashMap<Int, Fragment> // linkedHashMap 可以按 item 添加顺序排列
-//) {
-class FragmentHost(
+open class FragmentHost(
     private val viewId: Int,
     var fragmentManager: FragmentManager,
     private var fragmentMap: LinkedHashMap<Int, Class<out Fragment>> // linkedHashMap 可以按 item 添加顺序排列

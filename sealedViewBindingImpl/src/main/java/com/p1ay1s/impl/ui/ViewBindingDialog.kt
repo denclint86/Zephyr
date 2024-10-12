@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.view.LayoutInflater
 import androidx.databinding.ViewDataBinding
+import com.p1ay1s.base.databinding.ActivityCrashBinding
 import com.p1ay1s.impl.ViewBindingInterface
 
 /**
@@ -18,7 +19,7 @@ open class ViewBindingDialog<VB : ViewDataBinding>(context: Context) : AlertDial
         getViewBinding(LayoutInflater.from(context))
     }
 
-    protected fun VB.initBinding() {
+    open fun VB.initBinding() {
     }
 
     init {
