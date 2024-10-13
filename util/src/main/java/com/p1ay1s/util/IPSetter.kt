@@ -16,10 +16,8 @@ import com.p1ay1s.util.IPSetter.setIp
 import java.net.Inet4Address
 import java.net.NetworkInterface
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 var onNetworkConnectChangedCallback: () -> Unit = { setIp() }
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 object IPSetter {
     private val TAG = this::class.simpleName!!
     private val receiver = NetworkConnectChangedReceiver()
