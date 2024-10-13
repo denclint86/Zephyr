@@ -24,10 +24,6 @@ object IPSetter {
     private val TAG = this::class.simpleName!!
     private val receiver = NetworkConnectChangedReceiver()
 
-    init {
-        registerReceiver()
-    }
-
     fun setIp() {
         appIpAddress = getIp()
     }
@@ -35,7 +31,7 @@ object IPSetter {
     /**
      * 注册网络连接状态的广播接收器
      */
-    private fun registerReceiver() = with(IntentFilter()) {
+    fun registerReceiver() = with(IntentFilter()) {
         if (appContext == null) return@with
         addAction(WifiManager.WIFI_STATE_CHANGED_ACTION)
         addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION)

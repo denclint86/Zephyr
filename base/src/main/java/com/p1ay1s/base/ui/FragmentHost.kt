@@ -58,6 +58,17 @@ open class FragmentHost(
         fragmentManager.executePendingTransactions()
     }
 
+    fun hideAll() {
+        fragmentManager.beginTransaction().apply {
+            fragmentMap.forEach { (index) ->
+                findFragment(index)?.let {
+                    this.hide(it)
+                }
+            }
+        }.commit()
+        fragmentManager.executePendingTransactions()
+    }
+
     /**
      * 设置加索引监听器
      */
