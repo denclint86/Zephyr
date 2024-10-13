@@ -25,8 +25,8 @@ open class FragmentHost(
         fun onIndexChanged(index: Int)
     }
 
-    private var currentIndex: Int = fragmentMap.keys.first()
-        set(value) { // 赋值前通知索引改变
+    var currentIndex: Int = fragmentMap.keys.first()
+        private set(value) { // 赋值前通知索引改变
             indexChangedListener?.onIndexChanged(value)
             field = value
         }
@@ -50,7 +50,7 @@ open class FragmentHost(
         fragmentManager.beginTransaction().apply {
             setReorderingAllowed(true)
             fragmentMap.forEach { (index, fragment) ->
-                val f = fragment.getDeclaredConstructor().newInstance()
+                val f = fragment.getDeclaredConstructor().newInstance() // 通过 class 对象实例化 fragment
                 this.add(viewId, f, index.toString())
                 this.hide(f)
             }
@@ -216,6 +216,9 @@ open class FragmentHost(
         return f
     }
 
+    /**
+     * 是否已经加入 map 中
+     */
     private fun isIndexExisted(tag: Int): Boolean {
         return fragmentMap.keys.any { it == tag }
     }

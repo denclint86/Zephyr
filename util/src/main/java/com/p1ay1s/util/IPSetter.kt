@@ -22,6 +22,7 @@ var onNetworkConnectChangedCallback: () -> Unit = { setIp() }
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 object IPSetter {
     private val TAG = this::class.simpleName!!
+    private val receiver: NetworkConnectChangedReceiver()
 
     init {
         registerReceiver()
@@ -40,9 +41,16 @@ object IPSetter {
         addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION)
         addAction(ConnectivityManager.CONNECTIVITY_ACTION)
         appContext!!.registerReceiver(
-            NetworkConnectChangedReceiver(), this,
+            receiver, this,
             Context.RECEIVER_NOT_EXPORTED
         )
+    }
+
+    fun unregisterReceiver() {
+        if (appContext == null) return
+        runCatching {
+            appContext!!.unregisterReceiver(receiver)
+        }
     }
 
     /**
