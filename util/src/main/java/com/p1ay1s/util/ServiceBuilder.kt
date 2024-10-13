@@ -37,6 +37,11 @@ object ServiceBuilder {
         OkHttpClient.Builder()
             .readTimeout(READ_TIMEOUT_SET, TimeUnit.SECONDS)
             .connectTimeout(connectTimeoutSet, TimeUnit.SECONDS)
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .build()
+                chain.proceed(request)
+            } // 这个无用操作有时能神奇地解决某些问题
             .build()
     }
 

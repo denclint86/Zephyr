@@ -46,6 +46,7 @@ open class FragmentHost(
      * 将 map 的全部键值加入到 fragmentManager
      */
     fun addAll(map: LinkedHashMap<Int, Class<out Fragment>>? = null) {
+        if (fragmentManager.isDestroyed) return
         map?.let { fragmentMap.putAll(it) }
         fragmentManager.beginTransaction().apply {
             setReorderingAllowed(true)
@@ -59,6 +60,7 @@ open class FragmentHost(
     }
 
     fun hideAll() {
+        if (fragmentManager.isDestroyed) return
         fragmentManager.beginTransaction().apply {
             fragmentMap.forEach { (index) ->
                 findFragment(index)?.let {
@@ -81,6 +83,7 @@ open class FragmentHost(
     }
 
     fun findFragment(tag: Int): Fragment? {
+        if (fragmentManager.isDestroyed) return null
         return fragmentManager.findFragmentByTag(tag.toString())
     }
 
@@ -90,6 +93,7 @@ open class FragmentHost(
      * @param enter 进入动画
      */
     fun show(enter: Int = 0) {
+        if (fragmentManager.isDestroyed) return
         fragmentManager.beginTransaction().apply {
             setCustomAnimations(enter, 0)
             show(getCurrentFragment())
@@ -103,6 +107,7 @@ open class FragmentHost(
      * @param exit 退出动画
      */
     fun hide(exit: Int = 0) {
+        if (fragmentManager.isDestroyed) return
         fragmentManager.beginTransaction().apply {
             setCustomAnimations(0, exit)
             hide(getCurrentFragment())
@@ -121,6 +126,7 @@ open class FragmentHost(
      * 传入不存在的键直接退出函数
      */
     fun navigate(tag: Int, enter: Int = 0, exit: Int = 0): Boolean {
+        if (fragmentManager.isDestroyed) return false
         if (isIndexExisted(tag)) {
             if (tag == currentIndex) return false
 
@@ -155,6 +161,7 @@ open class FragmentHost(
      * 如果使用了已添加的索引则会覆盖对应的 fragment
      */
     fun add(index: Int, fragment: Class<out Fragment>, show: Boolean) {
+        if (fragmentManager.isDestroyed) return
         fragmentManager.beginTransaction().apply {
             if (isIndexExisted(index)) {
                 runCatching {
@@ -181,6 +188,7 @@ open class FragmentHost(
      * 移除一个未显示的 fragment
      */
     fun remove(tag: Int): Boolean {
+        if (fragmentManager.isDestroyed) return false
         if (tag == currentIndex) return false
 
         val fragment = getFragment(tag)
@@ -200,6 +208,7 @@ open class FragmentHost(
      * @param newIndex 移除后切换的索引
      */
     fun pop(tag: Int, newIndex: Int, enter: Int = 0, exit: Int = 0): Boolean {
+        if (fragmentManager.isDestroyed) return false
         if (!isIndexExisted(tag) || !isIndexExisted(newIndex)) return false
 
         if (!navigate(newIndex, enter, exit)) return false
@@ -210,6 +219,7 @@ open class FragmentHost(
     fun getCurrentFragment() = getFragment(currentIndex)
 
     fun removeAll() {
+        if (fragmentManager.isDestroyed) return
         fragmentManager.beginTransaction().apply {
             fragmentMap.forEach { (index, fragment) ->
                 findFragment(index)?.let { this.hide(it) }
