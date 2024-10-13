@@ -22,7 +22,7 @@ var onNetworkConnectChangedCallback: () -> Unit = { setIp() }
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 object IPSetter {
     private val TAG = this::class.simpleName!!
-    private val receiver: NetworkConnectChangedReceiver()
+    private val receiver = NetworkConnectChangedReceiver()
 
     init {
         registerReceiver()
