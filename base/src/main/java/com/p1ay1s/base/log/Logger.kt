@@ -110,12 +110,12 @@ open class LoggerClass {
         val detail = Log.getStackTraceString(throwable)
         val fullMsg = "at: ${title}\ndetails: $detail"
 
-        Log.e(TAG, fullMsg)
-
         appendLog(getName(ERROR), "UncaughtException", fullMsg)
         writeToFile()
 
         if (crashActivity != null && appContext != null) {
+            Log.e(TAG, fullMsg)
+
             with(Intent(appContext, crashActivity)) {
                 putExtra("TITLE", title)
                 putExtra("DETAIL", detail)
