@@ -15,9 +15,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import java.util.concurrent.TimeUnit
 
-@Deprecated("failure code becomes 'null'")
-const val ON_FAILURE_CODE = -1
-
 /**
  * 网络请求的封装
  */
@@ -37,11 +34,11 @@ object ServiceBuilder {
         OkHttpClient.Builder()
             .readTimeout(READ_TIMEOUT_SET, TimeUnit.SECONDS)
             .connectTimeout(connectTimeoutSet, TimeUnit.SECONDS)
-            .addInterceptor { chain ->
-                val request = chain.request().newBuilder()
-                    .build()
-                chain.proceed(request)
-            } // 这个无用操作有时能神奇地解决某些问题
+//            .addInterceptor { chain ->
+//                val request = chain.request().newBuilder()
+//                    .build()
+//                chain.proceed(request)
+//            }
             .build()
     }
 

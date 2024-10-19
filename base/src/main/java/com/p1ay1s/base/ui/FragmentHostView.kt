@@ -16,7 +16,7 @@ class FragmentHostView : FrameLayout {
     private var _fragmentHost: FragmentHost? = null
     val fragmentHost: FragmentHost
         get() = _fragmentHost
-            ?: throw IllegalStateException("have to bind FragmentHost first")
+            ?: throw IllegalStateException("have to create FragmentHost first")
 
     constructor(context: Context) : super(context)
 

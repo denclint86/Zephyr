@@ -2,7 +2,6 @@ package com.p1ay1s.base.ui
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import com.p1ay1s.base.extension.throwException
 
 /**
  * 基于 fragmentManager 的工具类
@@ -51,9 +50,10 @@ open class FragmentHost(
         fragmentManager.beginTransaction().apply {
             setReorderingAllowed(true)
             fragmentMap.forEach { (index, fragment) ->
-                val f = fragment.getDeclaredConstructor().newInstance() // 通过 class 对象实例化 fragment
-                this.add(viewId, f, index.toString())
-                this.hide(f)
+                createFragmentInstance(fragment)?.let { // 通过 class 对象实例化 fragment
+                    this.add(viewId, it, index.toString())
+                    this.hide(it)
+                }
             }
         }.commit()
         fragmentManager.executePendingTransactions()
@@ -96,7 +96,7 @@ open class FragmentHost(
         if (fragmentManager.isDestroyed) return
         fragmentManager.beginTransaction().apply {
             setCustomAnimations(enter, 0)
-            show(getCurrentFragment())
+            getCurrentFragment()?.let { show(it) }
         }.commit()
         fragmentManager.executePendingTransactions()
     }
@@ -110,7 +110,7 @@ open class FragmentHost(
         if (fragmentManager.isDestroyed) return
         fragmentManager.beginTransaction().apply {
             setCustomAnimations(0, exit)
-            hide(getCurrentFragment())
+            getCurrentFragment()?.let { hide(it) }
         }.commit()
         fragmentManager.executePendingTransactions()
     }
@@ -132,8 +132,8 @@ open class FragmentHost(
 
             fragmentManager.beginTransaction().apply {
                 setCustomAnimations(enter, exit)
-                hide(getCurrentFragment())
-                show(getFragment(tag))
+                getCurrentFragment()?.let { hide(it) }
+                getFragment(tag)?.let { show(it) }
             }.commit()
             fragmentManager.executePendingTransactions()
             currentIndex = tag
@@ -165,23 +165,45 @@ open class FragmentHost(
         fragmentManager.beginTransaction().apply {
             if (isIndexExisted(index)) {
                 runCatching {
-                    val oldFragment = getFragment(index)
-                    hide(oldFragment)
-                    remove(oldFragment)
+                    getFragment(index)?.let {
+                        hide(it)
+                        remove(it)
+                    }
                 }
             }
 
             fragmentMap[index] = fragment
-            val f = fragment.getDeclaredConstructor().newInstance()
-            this.add(viewId, f, index.toString()) // 就尼玛无语, 在这无限递归了
-            if (show) {
-                hide(getCurrentFragment())
-
-                currentIndex = index
-            } else
-                hide(f)
+            createFragmentInstance(fragment)?.let {
+                this.add(viewId, it, index.toString()) // 就尼玛无语, 在这无限递归了
+                if (show) {
+                    getCurrentFragment()?.let { hide(it) }
+                    currentIndex = index
+                } else
+                    hide(it)
+            }
         }.commit()
         fragmentManager.executePendingTransactions()
+    }
+
+    fun add(index: Int, fragment: Fragment, enter: Int = 0, exit: Int = 0) {
+        if (fragmentManager.isDestroyed) return
+        fragmentManager.beginTransaction().apply {
+            if (isIndexExisted(index)) {
+                runCatching {
+                    getFragment(index)?.let {
+                        hide(it)
+                        remove(it)
+                    }
+                }
+            }
+
+            fragmentMap[index] = fragment::class.java
+
+            this.add(viewId, fragment, index.toString()) // 就尼玛无语, 在这无限递归了
+            hide(fragment)
+        }.commit()
+        fragmentManager.executePendingTransactions()
+        navigate(index, enter, exit)
     }
 
     /**
@@ -191,11 +213,12 @@ open class FragmentHost(
         if (fragmentManager.isDestroyed) return false
         if (tag == currentIndex) return false
 
-        val fragment = getFragment(tag)
-        fragmentManager.beginTransaction().apply {
-            hide(fragment)
-            remove(fragment)
-        }.commit()
+        getFragment(tag)?.let {
+            fragmentManager.beginTransaction().apply {
+                hide(it)
+                remove(it)
+            }.commit()
+        }
         fragmentManager.executePendingTransactions()
 
         fragmentMap.remove(tag)
@@ -230,11 +253,16 @@ open class FragmentHost(
         fragmentManager.executePendingTransactions()
     }
 
-    private fun getFragment(index: Int): Fragment {
-        if (!isIndexExisted(index))
-            throwException("try to get a fragment with a not existed key")
+    private fun getFragment(index: Int): Fragment? {
+        if (!isIndexExisted(index)) return null
         val f = findFragment(index) ?: fragmentMap[index]!!.getDeclaredConstructor().newInstance()
         return f
+    }
+
+    private fun createFragmentInstance(clazz: Class<out Fragment>) = try {
+        clazz.getDeclaredConstructor().newInstance()
+    } catch (_: Exception) {
+        null
     }
 
     /**

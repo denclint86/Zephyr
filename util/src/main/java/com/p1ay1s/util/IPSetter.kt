@@ -29,6 +29,7 @@ object IPSetter {
     /**
      * 注册网络连接状态的广播接收器
      */
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     fun registerReceiver() = with(IntentFilter()) {
         if (appContext == null) return@with
         addAction(WifiManager.WIFI_STATE_CHANGED_ACTION)
