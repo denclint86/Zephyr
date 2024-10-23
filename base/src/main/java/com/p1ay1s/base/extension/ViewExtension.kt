@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.p1ay1s.base.appContext
 import com.p1ay1s.base.ui.FragmentHost
-import com.p1ay1s.base.ui.FragmentHostView
+import com.p1ay1s.base.ui.FragmentHostView2
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -24,13 +24,27 @@ val Activity.TAG
 val Fragment.TAG
     get() = this::class.simpleName!!
 
+fun Fragment.findHost(): FragmentHost? {
+    var view = view
+    var parent = view?.parent
+
+    while (parent != null) {
+        if (parent is FragmentHostView2) {
+            return parent.getActiveHost()
+        }
+        view = parent as? View // as? 如果转换失败则变为 null
+        parent = view?.parent
+    }
+    return null
+}
+
 suspend fun toastSuspended(msg: String, length: Int = Toast.LENGTH_SHORT) =
     withContext(Dispatchers.Main) {
         toast(msg, length)
     }
 
 fun toast(msg: String, length: Int = Toast.LENGTH_SHORT) {
-    if (msg.isNotBlank())
+    if (msg.isNotBlank() && appContext != null)
         Toast.makeText(appContext, msg, length).show()
 }
 
@@ -70,23 +84,6 @@ fun Activity.isPermissionGranted(name: String): Boolean = ContextCompat.checkSel
     this,
     name
 ) == PackageManager.PERMISSION_GRANTED
-
-/**
- * 从 Fragment 获取 FragmentController 的扩展函数
- */
-fun Fragment.findFragmentHost(): FragmentHost? {
-    var view = view
-    var parent = view?.parent
-
-    while (parent != null) {
-        if (parent is FragmentHostView) {
-            return parent.fragmentHost
-        }
-        view = parent as? View // as? 如果转换失败则变为 null
-        parent = view?.parent
-    }
-    return null
-}
 
 fun RecyclerView.setSnapHelper() {
     if (onFlingListener == null)

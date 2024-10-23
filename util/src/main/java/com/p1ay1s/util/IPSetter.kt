@@ -53,6 +53,7 @@ object IPSetter {
      */
     private fun getIp(): String {
         var ip = "0.0.0.0"
+        if (appContext == null) return ip
 
         try {
             val wifiManager: WifiManager =
