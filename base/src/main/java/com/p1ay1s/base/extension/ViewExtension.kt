@@ -4,7 +4,9 @@ import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.drawable.Drawable
 import android.view.View
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +15,12 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestBuilder
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
+import com.bumptech.glide.load.resource.bitmap.CircleCrop
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.p1ay1s.base.appContext
 import com.p1ay1s.base.ui.FragmentHost
 import com.p1ay1s.base.ui.FragmentHostView2
@@ -36,6 +44,55 @@ fun Fragment.findHost(): FragmentHost? {
         parent = view?.parent
     }
     return null
+}
+
+private const val RADIUS = 25
+
+fun ImageView.loadRadiusImage(
+    imgUrl: String,
+    radius: Int = RADIUS,
+    enableCrossFade: Boolean = true,
+) = set(imgUrl) {
+    if (enableCrossFade)
+        transition(DrawableTransitionOptions.withCrossFade())
+    transform(CenterCrop(), RoundedCorners(radius))
+}
+
+fun ImageView.loadCircleImage(
+    imgUrl: String,
+    enableCrossFade: Boolean = false,
+) = set(imgUrl) {
+    if (enableCrossFade)
+        transition(DrawableTransitionOptions.withCrossFade())
+    transform(CircleCrop())
+}
+
+/**
+ * 没有任何偏好
+ */
+fun ImageView.loadImage(
+    imgUrl: String,
+    enableCrossFade: Boolean = true,
+) = set(imgUrl) {
+    if (enableCrossFade)
+        transition(DrawableTransitionOptions.withCrossFade())
+    transform(CenterCrop())
+}
+
+private fun ImageView.set(
+    imgUrl: String,
+    preferences: RequestBuilder<Drawable>.() -> RequestBuilder<Drawable> = { this }
+) {
+    setVisible()
+    Glide.with(this)
+        .load(imgUrl)
+        .fitCenter()
+        .preferences()
+        .into(this)
+}
+
+private fun ImageView.setVisible() {
+    visibility = View.VISIBLE
 }
 
 suspend fun toastSuspended(msg: String, length: Int = Toast.LENGTH_SHORT) =
