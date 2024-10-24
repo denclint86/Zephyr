@@ -23,7 +23,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.p1ay1s.base.appContext
 import com.p1ay1s.base.ui.FragmentHost
-import com.p1ay1s.base.ui.FragmentHostView2
+import com.p1ay1s.base.ui.FragmentHostView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -37,7 +37,7 @@ fun Fragment.findHost(): FragmentHost? {
     var parent = view?.parent
 
     while (parent != null) {
-        if (parent is FragmentHostView2) {
+        if (parent is FragmentHostView) {
             return parent.getActiveHost()
         }
         view = parent as? View // as? 如果转换失败则变为 null
