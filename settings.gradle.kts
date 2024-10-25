@@ -30,5 +30,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Zephyr"
 include(":base")
-include(":sealedViewBindingImpl")
+include(":vbclass")
 include(":util")

@@ -1,10 +1,8 @@
-package com.p1ay1s.impl
+package com.p1ay1s.vbclass
 
 import android.os.Bundle
-import android.os.PersistableBundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.ViewDataBinding
-import com.p1ay1s.base.databinding.ActivityCrashBinding
 import com.p1ay1s.base.extension.TAG
 import com.p1ay1s.base.log.logI
 

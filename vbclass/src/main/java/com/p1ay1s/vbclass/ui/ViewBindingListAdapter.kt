@@ -1,4 +1,4 @@
-package com.p1ay1s.impl.ui
+package com.p1ay1s.vbclass.ui
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -6,7 +6,7 @@ import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.p1ay1s.impl.ViewBindingInterface
+import com.p1ay1s.vbclass.ViewBindingInterface
 
 /**
  * @param VB databinding

@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.p1ay1s.impl"
+    namespace = "com.p1ay1s.vbclass"
     compileSdk = 34
 
     defaultConfig {
-        minSdk = 24
+        minSdk = 26
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")

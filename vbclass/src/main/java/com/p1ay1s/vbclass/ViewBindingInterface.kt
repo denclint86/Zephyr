@@ -1,6 +1,6 @@
 @file:Suppress("UNCHECKED_CAST")
 
-package com.p1ay1s.impl
+package com.p1ay1s.vbclass
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

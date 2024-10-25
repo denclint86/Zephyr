@@ -1,4 +1,4 @@
-package com.p1ay1s.impl
+package com.p1ay1s.vbclass
 
 import android.content.Context
 import android.os.Bundle
