@@ -34,11 +34,6 @@ object ServiceBuilder {
         OkHttpClient.Builder()
             .readTimeout(READ_TIMEOUT_SET, TimeUnit.SECONDS)
             .connectTimeout(connectTimeoutSet, TimeUnit.SECONDS)
-//            .addInterceptor { chain ->
-//                val request = chain.request().newBuilder()
-//                    .build()
-//                chain.proceed(request)
-//            }
             .build()
     }
 
@@ -70,7 +65,9 @@ object ServiceBuilder {
      */
     fun <T> create(serviceClass: Class<T>): T = retrofit.create(serviceClass)
 
-    // ServiceBuilder.create<LoginService>()
+    /**
+     * ServiceBuilder.create<LoginService>()
+     */
     inline fun <reified T> create(): T = create(T::class.java)
 
     /**
@@ -101,30 +98,23 @@ object ServiceBuilder {
         val url = call.request().url().toString()
 
         override fun onResponse(call: Call<T>, response: Response<T>) {
-            with(response) {
-                when {
-                    isSuccessful && body() != null -> {
-                        if (enableLogger) logD(TAG, "success: $url")
-                        onSuccess(body()!!)
-                    } // 成功
-
-                    else -> {
-                        if (enableLogger) logE(TAG, "failed at: $url")
-                        onError(code(), message() ?: "Unknown error")
-                    } // 其他情况当作失败, 状态码也可以是 2xx
-                }
-            }
+            handleResponse(response, onSuccess, onError, url)
         }
 
-        /**
-         * 完全不用额外的判断, 就是连接失败
-         */
         override fun onFailure(call: Call<T>, t: Throwable) {
-            t.printStackTrace()
-            if (enableLogger) logE(TAG, "failed at: $url")
+            if (enableLogger) logE(TAG, "failed at: $url\n${t.message}\n${t.stackTrace}")
             onError(null, t.message ?: "Unknown error")
         }
     })
+
+    inline fun <reified T> requestExecute(
+        call: Call<T>,
+        crossinline onSuccess: (data: T) -> Unit,
+        crossinline onError: ((code: Int?, msg: String) -> Unit)
+    ) {
+        val url = call.request().url().toString()
+        handleResponse(call.execute(), onSuccess, onError, url)
+    }
 
     /**
      * 在 model 层确定 T 的类型，进一步回调给 viewModel 层
@@ -132,30 +122,36 @@ object ServiceBuilder {
      * @param onSuccess 包含返回体,
      * @param onError 包含状态码(可为2xx! 网络错误时为 null )以及信息
      */
-    suspend inline fun <reified T> requestExecute(
+    suspend inline fun <reified T> requestSuspend(
         call: Call<T>,
         crossinline onSuccess: (data: T) -> Unit,
         crossinline onError: ((code: Int?, msg: String) -> Unit)
     ) = withContext(Dispatchers.IO) {
         val url = call.request().url().toString()
-        try {
-            with(call.awaitResponse()) {
-                when {
-                    isSuccessful && body() != null -> {
-                        if (enableLogger) logD(TAG, "success: $url")
-                        onSuccess(body()!!)
-                    }// 成功
+        handleResponse(call.awaitResponse(), onSuccess, onError, url)
+    }
 
-                    else -> {
-                        if (enableLogger) logE(TAG, "failed at: $url")
-                        onError(code(), message() ?: "Unknown error")
-                    }// 其他失败情况
-                }
+    inline fun <reified T> handleResponse(
+        response: Response<T>,
+        crossinline onSuccess: (data: T) -> Unit,
+        crossinline onError: ((code: Int?, msg: String) -> Unit),
+        url: String
+    ) = try {
+        response.run {
+            when {
+                isSuccessful && body() != null -> {
+                    if (enableLogger) logD(TAG, "success: $url")
+                    onSuccess(body()!!)
+                } // 成功
+
+                else -> {
+                    if (enableLogger) logE(TAG, "failed at: $url")
+                    onError(code(), message() ?: "Unknown error")
+                } // 其他失败情况
             }
-        } catch (t: Throwable) {
-            t.printStackTrace()
-            if (enableLogger) logE(TAG, "failed at: $url")
-            onError(null, t.message ?: "Unknown error")
         }
+    } catch (t: Throwable) {
+        if (enableLogger) logE(TAG, "failed at: $url\n${t.message}\n${t.stackTrace}")
+        onError(null, t.message ?: "Unknown error")
     }
 }

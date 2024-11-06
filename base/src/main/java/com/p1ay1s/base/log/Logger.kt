@@ -74,6 +74,7 @@ fun getName(level: Int): String = levels[level]!!
 
 open class LoggerClass {
     protected val TAG = this::class.simpleName!!
+
     protected lateinit var fileDir: File
     protected lateinit var file: File
 
@@ -107,7 +108,7 @@ open class LoggerClass {
         isCrashed = true
 
         val title = thread.name
-        val detail = Log.getStackTraceString(throwable)
+        val detail = throwable.message + "\n" + throwable.stackTrace
         val fullMsg = "at: ${title}\ndetails: $detail"
 
         appendLog(getName(ERROR), "UncaughtException", fullMsg)
