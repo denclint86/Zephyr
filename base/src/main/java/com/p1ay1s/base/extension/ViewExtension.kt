@@ -1,6 +1,9 @@
+@file:Suppress("FunctionName")
+
 package com.p1ay1s.base.extension
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
@@ -27,11 +30,14 @@ import com.p1ay1s.base.ui.FragmentHostView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+private const val RADIUS = 25
+
 val Activity.TAG
     get() = this::class.simpleName!!
 val Fragment.TAG
     get() = this::class.simpleName!!
 
+@Deprecated("")
 fun Fragment.findHost(): FragmentHost? {
     var view = view
     var parent = view?.parent
@@ -46,8 +52,7 @@ fun Fragment.findHost(): FragmentHost? {
     return null
 }
 
-private const val RADIUS = 25
-
+@SuppressLint("CheckResult")
 fun ImageView.loadRadiusImage(
     imgUrl: String,
     radius: Int = RADIUS,
@@ -58,6 +63,7 @@ fun ImageView.loadRadiusImage(
     transform(CenterCrop(), RoundedCorners(radius))
 }
 
+@SuppressLint("CheckResult")
 fun ImageView.loadCircleImage(
     imgUrl: String,
     enableCrossFade: Boolean = false,
@@ -70,6 +76,7 @@ fun ImageView.loadCircleImage(
 /**
  * 没有任何偏好
  */
+@SuppressLint("CheckResult")
 fun ImageView.loadImage(
     imgUrl: String,
     enableCrossFade: Boolean = true,
@@ -95,24 +102,30 @@ private fun ImageView.setVisible() {
     visibility = View.VISIBLE
 }
 
-suspend fun toastSuspended(msg: String, length: Int = Toast.LENGTH_SHORT) =
-    withContext(Dispatchers.Main) {
-        toast(msg, length)
-    }
-
-fun toast(msg: String, length: Int = Toast.LENGTH_SHORT) {
-    if (msg.isNotBlank() && appContext != null)
-        Toast.makeText(appContext, msg, length).show()
+suspend fun toastSuspended(
+    msg: String,
+    cancelLast: Boolean = true,
+    length: Int = Toast.LENGTH_SHORT
+) = withContext(Dispatchers.Main) {
+    toast(msg, cancelLast, length)
 }
 
-fun Any?.toast() {
+fun toast(msg: String, cancelLast: Boolean = true, length: Int = Toast.LENGTH_SHORT) {
+    if (msg.isNotBlank() && appContext != null) {
+        if (cancelLast)
+            Toast(appContext).cancel()
+        Toast.makeText(appContext, msg, length).show()
+    }
+}
+
+fun Any?.toast(cancelLast: Boolean = true) {
     val str = this.toString()
-    if (str.isNotBlank()) toast(str)
+    if (str.isNotBlank()) toast(str, cancelLast)
 }
 
 
 /**
- * 检查和获取权限, 最后后调权限情况
+ * 检查权限状态, 若未授予则先获取权限, 最后回调检查结果
  */
 fun AppCompatActivity.withPermission(
     name: String = WRITE_EXTERNAL_STORAGE,
@@ -126,6 +139,8 @@ fun AppCompatActivity.withPermission(
 }
 
 /**
+ * 尝试获取权限, 然后回调结果
+ *
  * @param name Manifest.permission.XXX
  *
  * startActivityForResult 的简化版
@@ -142,6 +157,9 @@ fun Activity.isPermissionGranted(name: String): Boolean = ContextCompat.checkSel
     name
 ) == PackageManager.PERMISSION_GRANTED
 
+/**
+ * 设置后可以让最近的 item 吸附至中间
+ */
 fun RecyclerView.setSnapHelper() {
     if (onFlingListener == null)
         PagerSnapHelper().attachToRecyclerView(this)
@@ -162,6 +180,7 @@ fun RecyclerView.addLineDecoration(context: Context, orientation: Int) {
 
 /**
  * @param cannotScrollOrientation 指定的方向
+ *
  *  1: 无法往下
  *
  * -1: 无法往上
@@ -179,6 +198,7 @@ fun RecyclerView.addOnLoadMoreListener_V(cannotScrollOrientation: Int, onLoad: (
 
 /**
  * @param cannotScrollOrientation 指定的方向
+ *
  *  1: 无法往右
  *
  * -1: 无法往左

@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
  *
  * 直接用您的 activity ,或在项目中注册您继承的子类并给 Logger.crashActivity 赋值 YourChildActivity::java.class
  */
+@Deprecated("")
 abstract class CrashActivity : Activity(), ActivityPreferences.TwoClicksListener {
     protected var backPressTimer: Job? = null
     protected var oneMoreToFinish = false

@@ -3,6 +3,7 @@ package com.p1ay1s.base
 import android.app.Application
 import android.content.Context
 
+@Deprecated("")
 abstract class App : Application() {
 
     /**
@@ -11,10 +12,7 @@ abstract class App : Application() {
      * Logger.crashActivity = YourCrashActivity::class.java
      * startLogger(context, com.p1ay1s.dev.log.ERROR)
      */
-    abstract fun whenOnCreate(context: Context)
-
-    override fun onCreate() {
-        super.onCreate()
-        whenOnCreate(this)
+    @Deprecated("")
+    fun whenOnCreate(context: Context) {
     }
 }

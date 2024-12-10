@@ -15,25 +15,54 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import java.util.concurrent.TimeUnit
 
-/**
- * 网络请求的封装
- */
-object ServiceBuilder {
-    private interface PingService {
-        @GET("/")
-        fun ping(): Call<Unit>
+private interface PingService {
+    @GET("/")
+    fun ping(): Call<Unit>
+}
+
+private class PingModel(private val baseUrl: String) {
+    //    val service: PingService by lazy { ServiceBuilder.create(PingService::class.java) }
+    val service: PingService by lazy { // 一般情况下请使用注释掉的那种用法
+        ServiceBuilder.retrofitBuilder(baseUrl).create(PingService::class.java)
     }
 
-    const val TAG = "ServiceBuilder"
-    var enableLogger = false
+    inline fun ping(crossinline callback: (Boolean) -> Unit) {
+        ServiceBuilder.requestEnqueue(service.ping(),
+            { _ -> callback(true) },
+            { _, _ -> callback(false) })
+    }
+}
 
-    private var connectTimeoutSet = 7L
+/**
+ * 本想实现让开发者自定义请求的判断逻辑, 无奈技术有限
+ *
+ * 使用这个接口必须要让泛型敲定, 所以写不下去了
+ */
+fun interface ResponseJudge<T> {
+    fun isRequestSuccess(response: Response<T>): Boolean
+}
+
+/**
+ * 网络请求的封装, 含同步异步的请求方法
+ *
+ * baseurl: 在 application 中设置 appBaseUrl
+ * enableLogger: 设置为真后可以打印每个请求的日志
+ *
+ * @sample PingService
+ * @sample PingModel
+ */
+object ServiceBuilder {
+
+    const val TAG = "ServiceBuilder"
+    var enableLogger = false // 设置此值以决定是否启用日志, 若要启用, 必须要先设置 Logger 的日志等级
+
+    private var CONNECT_TIMEOUT_SET = 7L
     private const val READ_TIMEOUT_SET = 15L
 
     private val client: OkHttpClient by lazy {
         OkHttpClient.Builder()
             .readTimeout(READ_TIMEOUT_SET, TimeUnit.SECONDS)
-            .connectTimeout(connectTimeoutSet, TimeUnit.SECONDS)
+            .connectTimeout(CONNECT_TIMEOUT_SET, TimeUnit.SECONDS)
             .build()
     }
 
@@ -42,16 +71,16 @@ object ServiceBuilder {
     }
 
     /**
-     * 在第一次获取 retrofit 对象之前调用即可设置
+     * 在第一次获取 retrofit 对象之前调用即可设置连接超时
      */
     fun setTimeout(time: Long) {
-        connectTimeoutSet = time
+        CONNECT_TIMEOUT_SET = time
     }
 
     /**
      * 创建并返回一个 retrofit 实例
      */
-    private fun retrofitBuilder(baseUrl: String = appBaseUrl) = Retrofit.Builder()
+    fun retrofitBuilder(baseUrl: String = appBaseUrl) = Retrofit.Builder()
         .baseUrl(baseUrl)
         .client(client)
         .addConverterFactory(GsonConverterFactory.create())
@@ -73,18 +102,11 @@ object ServiceBuilder {
     /**
      * 检测 url 连通性并回调一个 boolean 值
      */
-    fun ping(url: String, callback: (Boolean) -> Unit) =
-        with(retrofitBuilder(url).create(PingService::class.java)) {
-            requestEnqueue(this.ping(),
-                {
-                    callback(true)
-                },
-                { _, _ ->
-                    callback(false)
-                })
-        }
+    fun ping(url: String, callback: (Boolean) -> Unit) = PingModel(url).ping { callback(it) }
 
     /**
+     * 异步方法
+     *
      * 在 model 层确定 T 的类型，进一步回调给 viewModel 层
      *
      * @param onSuccess 包含返回体,
@@ -107,6 +129,14 @@ object ServiceBuilder {
         }
     })
 
+    /**
+     * 同步方法
+     *
+     * 在 model 层确定 T 的类型，进一步回调给 viewModel 层
+     *
+     * @param onSuccess 包含返回体,
+     * @param onError 包含状态码(可为2xx! 网络错误时为 null )以及信息
+     */
     inline fun <reified T> requestExecute(
         call: Call<T>,
         crossinline onSuccess: (data: T) -> Unit,
@@ -117,6 +147,8 @@ object ServiceBuilder {
     }
 
     /**
+     * 挂起方法
+     *
      * 在 model 层确定 T 的类型，进一步回调给 viewModel 层
      *
      * @param onSuccess 包含返回体,

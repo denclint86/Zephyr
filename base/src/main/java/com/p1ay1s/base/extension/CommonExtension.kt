@@ -1,4 +1,5 @@
 @file:Suppress("NOTHING_TO_INLINE")
+
 package com.p1ay1s.base.extension
 
 import androidx.lifecycle.ViewModel
@@ -10,10 +11,6 @@ inline fun getFunctionName(): String {
     } else {
         ""
     }
-}
-
-fun throwException(msg: String) {
-    throw IllegalStateException(getFunctionName() + msg)
 }
 
 val ViewModel.TAG

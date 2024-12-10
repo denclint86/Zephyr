@@ -47,7 +47,7 @@ afterEvaluate {
 
 dependencies {
     implementation(libs.github.glide)
-2
+
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
     implementation(libs.androidx.recyclerview)

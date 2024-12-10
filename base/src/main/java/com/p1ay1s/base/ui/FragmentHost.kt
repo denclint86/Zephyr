@@ -1,11 +1,31 @@
 package com.p1ay1s.base.ui
 
+import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import java.util.Stack
 
 /**
+ * 在 view 以及它的子 view 中寻找并返回一个 FragmentHost 实例
+ */
+fun Fragment.findHost(): FragmentHost? {
+    var view = view
+    var parent = view?.parent
+
+    while (parent != null) {
+        if (parent is FragmentHostView) {
+            return parent.getActiveHost()
+        }
+        view = parent as? View // as? 如果转换失败则变为 null
+        parent = view?.parent
+    }
+    return null
+}
+
+/**
+ * 负责管理一个页面中的 fragment
+ *
  * 每一个实例都是 fragment 返回栈
  */
 open class FragmentHost(

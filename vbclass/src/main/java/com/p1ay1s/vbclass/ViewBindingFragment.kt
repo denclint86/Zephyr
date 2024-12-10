@@ -71,6 +71,9 @@ abstract class ViewBindingFragment<VB : ViewDataBinding> : Fragment(),
         super.onStop()
     }
 
+    /**
+     * 防止内存泄漏
+     */
     override fun onDestroyView() {
         logI(TAG, "$TAG onDestroyView", false)
         super.onDestroyView()

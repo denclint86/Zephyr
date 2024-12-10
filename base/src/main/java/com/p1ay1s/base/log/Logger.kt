@@ -12,7 +12,6 @@ import android.os.Looper
 import android.util.Log
 import com.p1ay1s.base.appContext
 import com.p1ay1s.base.extension.getFunctionName
-import com.p1ay1s.base.extension.throwException
 import com.p1ay1s.base.extension.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -155,7 +154,7 @@ open class LoggerClass {
             }
 
             DO_NOT_LOG -> LOG_LEVEL = newLevel
-            else -> throwException("log level should between VERBOSE and DO_NOT_LOG")
+            else -> throw Exception("log level should between VERBOSE and DO_NOT_LOG")
         }
 
     /**
