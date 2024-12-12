@@ -114,7 +114,7 @@ object ServiceBuilder {
      */
     inline fun <reified T> requestEnqueue(
         call: Call<T>,
-        crossinline onSuccess: (data: T) -> Unit,
+        crossinline onSuccess: (data: T?) -> Unit,
         crossinline onError: ((code: Int?, msg: String) -> Unit)
     ) = call.enqueue(object : Callback<T> {
         val url = call.request().url().toString()
@@ -139,7 +139,7 @@ object ServiceBuilder {
      */
     inline fun <reified T> requestExecute(
         call: Call<T>,
-        crossinline onSuccess: (data: T) -> Unit,
+        crossinline onSuccess: (data: T?) -> Unit,
         crossinline onError: ((code: Int?, msg: String) -> Unit)
     ) {
         val url = call.request().url().toString()
@@ -156,7 +156,7 @@ object ServiceBuilder {
      */
     suspend inline fun <reified T> requestSuspend(
         call: Call<T>,
-        crossinline onSuccess: (data: T) -> Unit,
+        crossinline onSuccess: (data: T?) -> Unit,
         crossinline onError: ((code: Int?, msg: String) -> Unit)
     ) = withContext(Dispatchers.IO) {
         val url = call.request().url().toString()
@@ -165,15 +165,15 @@ object ServiceBuilder {
 
     inline fun <reified T> handleResponse(
         response: Response<T>,
-        crossinline onSuccess: (data: T) -> Unit,
+        crossinline onSuccess: (data: T?) -> Unit,
         crossinline onError: ((code: Int?, msg: String) -> Unit),
         url: String
     ) = try {
         response.run {
             when {
-                isSuccessful && body() != null -> {
+                isSuccessful -> {
                     if (enableLogger) logD(TAG, "success: $url")
-                    onSuccess(body()!!)
+                    onSuccess(body())
                 } // 成功
 
                 else -> {
@@ -182,8 +182,8 @@ object ServiceBuilder {
                 } // 其他失败情况
             }
         }
-    } catch (t: Throwable) {
-        if (enableLogger) logE(TAG, "failed at: $url\n${t.message}\n${t.stackTrace}")
-        onError(null, t.message ?: "Unknown error")
+    } catch (e: Exception) {
+        if (enableLogger) logE(TAG, "failed at: $url\n${e.message}\n${e.stackTrace}")
+        onError(null, e.message ?: "Unknown error")
     }
 }
