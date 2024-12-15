@@ -27,7 +27,7 @@ val dataStoreInstance: DataStore<Preferences> by lazy {
 /**
  * 插入泛型值元素到 DataStore 中
  */
-suspend fun <T> Preferences.Key<T>.putStore(value: T) {
+suspend fun <T> Preferences.Key<T>.putValue(value: T) {
     dataStoreInstance.edit {
         it[this] = value
     }
@@ -36,15 +36,15 @@ suspend fun <T> Preferences.Key<T>.putStore(value: T) {
 /**
  * 插入泛型值元素到 DataStore 中
  */
-suspend fun <T> putStore(
+suspend fun <T> putPreference(
     preferencesKey: Preferences.Key<T>,
     value: T
-) = preferencesKey.putStore(value)
+) = preferencesKey.putValue(value)
 
 /**
  * 获取 DataStore 对应的泛型值
  */
-suspend fun <T> Preferences.Key<T>.getStore(default: T? = null): T? {
+suspend fun <T> Preferences.Key<T>.getValue(default: T? = null): T? {
     return dataStoreInstance.data.map {
         it[this] ?: default
     }.first()
@@ -53,7 +53,7 @@ suspend fun <T> Preferences.Key<T>.getStore(default: T? = null): T? {
 /**
  * 获取 DataStore 对应的泛型值
  */
-suspend fun <T> getStore(
+suspend fun <T> getPreference(
     preferencesKey: Preferences.Key<T>,
     default: T? = null
-): T? = preferencesKey.getStore(default)
+): T? = preferencesKey.getValue(default)
