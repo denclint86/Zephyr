@@ -34,15 +34,6 @@ private class PingModel(private val baseUrl: String) {
 }
 
 /**
- * 本想实现让开发者自定义请求的判断逻辑, 无奈技术有限
- *
- * 使用这个接口必须要让泛型敲定, 所以写不下去了
- */
-fun interface ResponseJudge<T> {
-    fun isRequestSuccess(response: Response<T>): Boolean
-}
-
-/**
  * 网络请求的封装, 含同步异步的请求方法
  *
  * baseurl: 在 application 中设置 appBaseUrl

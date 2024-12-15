@@ -80,7 +80,7 @@ fun View.setMargins(
     requestLayout()
 }
 
-fun Activity.restartApplication() {
+fun Activity.roadApp() {
     packageManager.getLaunchIntentForPackage(packageName)?.run {
         this.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         startActivity(this)
