@@ -1,12 +1,12 @@
-package com.p1ay1s.base
+package com.zephyr.base
 
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.annotation.CallSuper
-import com.p1ay1s.base.databinding.ActivityCrashBinding
-import com.p1ay1s.base.extension.toast
+import com.zephyr.base.databinding.ActivityCrashBinding
+import com.zephyr.base.extension.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

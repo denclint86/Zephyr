@@ -1,6 +1,6 @@
 @file:Suppress("NOTHING_TO_INLINE")
 
-package com.p1ay1s.base.extension
+package com.zephyr.base.extension
 
 import androidx.lifecycle.ViewModel
 

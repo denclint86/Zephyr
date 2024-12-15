@@ -1,4 +1,4 @@
-package com.p1ay1s.util
+package com.zephyr.util
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder

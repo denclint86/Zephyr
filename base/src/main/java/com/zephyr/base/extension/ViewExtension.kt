@@ -1,14 +1,16 @@
 @file:Suppress("FunctionName")
 
-package com.p1ay1s.base.extension
+package com.zephyr.base.extension
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -24,9 +26,9 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.p1ay1s.base.appContext
-import com.p1ay1s.base.ui.FragmentHost
-import com.p1ay1s.base.ui.FragmentHostView
+import com.zephyr.base.appContext
+import com.zephyr.base.ui.FragmentHost
+import com.zephyr.base.ui.FragmentHostView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -36,6 +38,55 @@ val Activity.TAG
     get() = this::class.simpleName!!
 val Fragment.TAG
     get() = this::class.simpleName!!
+
+fun View.setSize(size: Int) = setSize(size, size)
+
+fun View.setSize(width: Int? = null, height: Int? = null) = runCatching {
+    val lp = layoutParams
+    lp?.run {
+        width?.let { this.width = it }
+        height?.let { this.height = it }
+    } ?: return@runCatching
+    layoutParams = lp
+    requestLayout()
+}
+
+fun View.setHorizontalMargins(margin: Int) {
+    setMargins(start = margin, end = margin)
+}
+
+fun View.setVerticalMargins(margin: Int) {
+    setMargins(top = margin, bottom = margin)
+}
+
+fun View.setMargins(margin: Int) {
+    setMargins(margin, margin, margin, margin)
+}
+
+fun View.setMargins(
+    start: Int? = null,
+    end: Int? = null,
+    top: Int? = null,
+    bottom: Int? = null,
+) = runCatching {
+    val lp = layoutParams
+    (lp as? ViewGroup.MarginLayoutParams)?.run {
+        start?.let { leftMargin = it }
+        end?.let { rightMargin = it }
+        top?.let { topMargin = it }
+        bottom?.let { bottomMargin = it }
+    } ?: return@runCatching
+    layoutParams = lp
+    requestLayout()
+}
+
+fun Activity.restartApplication() {
+    packageManager.getLaunchIntentForPackage(packageName)?.run {
+        this.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        startActivity(this)
+        Runtime.getRuntime().exit(0)
+    }
+}
 
 @Deprecated("")
 fun Fragment.findHost(): FragmentHost? {

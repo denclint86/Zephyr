@@ -1,6 +1,6 @@
 @file:Suppress("NOTHING_TO_INLINE")
 
-package com.p1ay1s.base.log
+package com.zephyr.base.log
 
 import android.app.Activity
 import android.app.Application
@@ -10,9 +10,9 @@ import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import com.p1ay1s.base.appContext
-import com.p1ay1s.base.extension.getFunctionName
-import com.p1ay1s.base.extension.toast
+import com.zephyr.base.appContext
+import com.zephyr.base.extension.getFunctionName
+import com.zephyr.base.extension.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -215,6 +215,7 @@ open class LoggerClass {
     protected fun getLogFile(): File {
         val fileName =
             FILE_HEADER + dateFormat + FILE_TYPE
+
         /**
          * 判断名字主要是为了保证日期一致
          */
@@ -277,9 +278,7 @@ open class LoggerClass {
 /**
  * 功能: 定时录入日志到本地, 在崩溃时展示崩溃原因
  */
-object Logger : LoggerClass() {
-
-}
+object Logger : LoggerClass()
 
 inline fun logV(tag: String = "", msg: String = "", getFunctionName: Boolean = true) =
     with(VERBOSE) {

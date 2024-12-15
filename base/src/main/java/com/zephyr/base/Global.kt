@@ -1,4 +1,4 @@
-package com.p1ay1s.base
+package com.zephyr.base
 
 import android.content.Context
 import android.util.Log
@@ -18,3 +18,4 @@ var appContext: Context? = null
 
 var appBaseUrl = ""
 var appIpAddress = ""
+var appPreferenceName = "zephyr_datastore_pref"

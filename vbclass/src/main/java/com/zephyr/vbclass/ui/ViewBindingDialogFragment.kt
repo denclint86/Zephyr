@@ -1,4 +1,4 @@
-package com.p1ay1s.vbclass.ui
+package com.zephyr.vbclass.ui
 
 import android.annotation.SuppressLint
 import android.app.Dialog
@@ -10,7 +10,7 @@ import androidx.databinding.ViewDataBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.p1ay1s.vbclass.ViewBindingInterface
+import com.zephyr.vbclass.ViewBindingInterface
 
 abstract class ViewBindingDialogFragment<VB : ViewDataBinding>(
     private val expandedHeightPercent: Double = MAX_HEIGHT_PERCENT

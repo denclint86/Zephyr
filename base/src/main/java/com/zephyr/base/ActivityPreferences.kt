@@ -1,4 +1,4 @@
-package com.p1ay1s.base
+package com.zephyr.base
 
 interface ActivityPreferences {
     interface TwoClicksListener {

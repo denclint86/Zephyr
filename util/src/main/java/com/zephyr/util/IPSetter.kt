@@ -1,4 +1,4 @@
-package com.p1ay1s.util
+package com.zephyr.util
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -10,9 +10,9 @@ import android.net.NetworkInfo
 import android.net.wifi.WifiManager
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.p1ay1s.base.appContext
-import com.p1ay1s.base.appIpAddress
-import com.p1ay1s.util.IPSetter.setIp
+import com.zephyr.base.appContext
+import com.zephyr.base.appIpAddress
+import com.zephyr.util.IPSetter.setIp
 import java.net.Inet4Address
 import java.net.NetworkInterface
 

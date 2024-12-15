@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.p1ay1s.vbclass"
+    namespace = "com.zephyr.vbclass"
     compileSdk = 34
 
     defaultConfig {

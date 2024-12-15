@@ -1,4 +1,4 @@
-package com.p1ay1s.vbclass
+package com.zephyr.vbclass
 
 import android.content.Context
 import android.os.Bundle
@@ -7,8 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
-import com.p1ay1s.base.extension.TAG
-import com.p1ay1s.base.log.logI
+import com.zephyr.base.extension.TAG
+import com.zephyr.base.log.logI
 
 /**
  * @see ViewBindingInterface 注意事项

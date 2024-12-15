@@ -1,11 +1,11 @@
 @file:Suppress("UNCHECKED_CAST")
 
-package com.p1ay1s.vbclass
+package com.zephyr.vbclass
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.ViewDataBinding
-import com.p1ay1s.base.log.logE
+import com.zephyr.base.log.logE
 import java.lang.reflect.ParameterizedType
 
 /**

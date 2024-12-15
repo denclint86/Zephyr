@@ -1,10 +1,10 @@
-package com.p1ay1s.vbclass
+package com.zephyr.vbclass
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.ViewDataBinding
-import com.p1ay1s.base.extension.TAG
-import com.p1ay1s.base.log.logI
+import com.zephyr.base.extension.TAG
+import com.zephyr.base.log.logI
 
 /**
  * @see ViewBindingInterface 注意事项

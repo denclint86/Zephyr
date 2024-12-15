@@ -1,4 +1,4 @@
-package com.p1ay1s.base
+package com.zephyr.base
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

@@ -1,8 +1,8 @@
-package com.p1ay1s.util
+package com.zephyr.util
 
-import com.p1ay1s.base.appBaseUrl
-import com.p1ay1s.base.log.logD
-import com.p1ay1s.base.log.logE
+import com.zephyr.base.appBaseUrl
+import com.zephyr.base.log.logD
+import com.zephyr.base.log.logE
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -21,7 +21,7 @@ private interface PingService {
 }
 
 private class PingModel(private val baseUrl: String) {
-    //    val service: PingService by lazy { ServiceBuilder.create(PingService::class.java) }
+    // val service: PingService by lazy { ServiceBuilder.create(PingService::class.java) }
     val service: PingService by lazy { // 一般情况下请使用注释掉的那种用法
         ServiceBuilder.retrofitBuilder(baseUrl).create(PingService::class.java)
     }
@@ -80,7 +80,7 @@ object ServiceBuilder {
     /**
      * 创建并返回一个 retrofit 实例
      */
-    fun retrofitBuilder(baseUrl: String = appBaseUrl) = Retrofit.Builder()
+    fun retrofitBuilder(baseUrl: String = appBaseUrl): Retrofit = Retrofit.Builder()
         .baseUrl(baseUrl)
         .client(client)
         .addConverterFactory(GsonConverterFactory.create())

@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.p1ay1s.base"
+    namespace = "com.zephyr.base"
     compileSdk = 34
 
     defaultConfig {
