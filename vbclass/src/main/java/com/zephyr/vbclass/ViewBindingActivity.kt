@@ -1,7 +1,11 @@
 package com.zephyr.vbclass
 
 import android.os.Bundle
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.ViewDataBinding
 import com.zephyr.base.extension.TAG
 import com.zephyr.base.log.logI
@@ -60,5 +64,19 @@ abstract class ViewBindingActivity<VB : ViewDataBinding> : AppCompatActivity(),
         super.onDestroy()
         _binding?.unbind()
         _binding = null
+    }
+
+    protected fun enableFullScreen() {
+        enableEdgeToEdge()
+
+        val windowController = WindowCompat.getInsetsController(window, window.decorView)
+
+        // 应用全屏时，用户仍然可以从屏幕顶部下拉唤出状态栏，此行代码实现当用户唤出状态栏后，自动隐藏状态栏
+        windowController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+
+        // 隐藏包括状态栏、导航栏、caption bar 在内的所有系统栏
+        windowController.hide(WindowInsetsCompat.Type.systemBars())
+
     }
 }
