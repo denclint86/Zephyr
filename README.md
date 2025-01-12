@@ -2,8 +2,6 @@
 
 此依赖是作者在日常开发时, 封装的一些比较常用的类和方法
 
-
-
 以下为部分方法:
 
 ## ::base
@@ -19,15 +17,15 @@
 
 ### Logger.kt
 
-​	本地文件日志写入
+​ 本地文件日志写入
 
 ### FragmentHostView
 
-​	一个类似 NavController 的 View, 更简单并且没有 NavController 重走生命周期的问题
+​ 一个类似 NavController 的 View, 更简单并且没有 NavController 重走生命周期的问题
 
 ### PreloadLayoutManager
 
-​	可预加载数个 item 的 LinearLayoutManager 子类
+​ 可预加载数个 item 的 LinearLayoutManager 子类
 
 ---
 
@@ -35,26 +33,38 @@
 
 ### DataStoreHelper
 
-​	androidx.datastore 的封装函数
+​ androidx.datastore 的封装函数
+
+````kotlin
+val preferenceXXX = stringPreferencesKey("key_name")
+
+suspend fun example() {
+    preferenceXXX.putValue("the value")
+    putPreference(preferenceXXX, "the value")
+
+    preferenceXXX.getValue("the value")
+    getPreference(preferenceXXX, "default value")
+}
+````
 
 ### Json
 
-​	Gson 封装函数
+​ Gson 封装函数
 
 ### ServiceBuilder
 
-​	retrofit2 网络请求封装类, 请求方法分为同步异步以及可挂起三种
+​ retrofit2 网络请求封装类, 请求方法分为同步异步以及可挂起三种
 
 ---
 
 ## ::vbclass
 
-​	基于 databinding 的 View 封装, 包含 activity, fragment, adapter, dailog, dialogFragment
+​ 基于 databinding 的 View 封装, 包含 activity, fragment, adapter, dailog, dialogFragment
 
-​	简化了 databinding 的使用
+​ 简化了 databinding 的使用
 
 ````kotlin
-class YourActivity: ViewBindingActivity<ActivityYourBinding>() {
+class YourActivity : ViewBindingActivity<ActivityYourBinding>() {
     override fun ActivityYourBinding.initBinding() {
         exampleTextView.text = "666"
     }
@@ -69,7 +79,7 @@ class YourActivity: ViewBindingActivity<ActivityYourBinding>() {
 class YourApp {
     override fun onCreate() {
         super.onCreate()
-		appContext = context
+        appContext = context
     }
 }
 ````

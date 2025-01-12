@@ -45,27 +45,15 @@ private class PingModel(private val baseUrl: String) {
 object ServiceBuilder {
 
     const val TAG = "ServiceBuilder"
-    var enableLogger = false // 设置此值以决定是否启用日志, 若要启用, 必须要先设置 Logger 的日志等级
 
-    private var CONNECT_TIMEOUT_SET = 7L
-    private const val READ_TIMEOUT_SET = 15L
+    private var CONNECT_TIMEOUT_SET = 15L
+    private const val READ_TIMEOUT_SET = 10L
 
     val client: OkHttpClient by lazy {
         OkHttpClient.Builder()
             .readTimeout(READ_TIMEOUT_SET, TimeUnit.SECONDS)
             .connectTimeout(CONNECT_TIMEOUT_SET, TimeUnit.SECONDS)
             .build()
-    }
-
-    private val retrofit: Retrofit by lazy {
-        retrofitBuilder(appBaseUrl)
-    }
-
-    /**
-     * 在第一次获取 retrofit 对象之前调用即可设置连接超时
-     */
-    fun setTimeout(time: Long) {
-        CONNECT_TIMEOUT_SET = time
     }
 
     /**
@@ -83,17 +71,15 @@ object ServiceBuilder {
      * example:
      * ServiceBuilder.create(LoginService::class.java)
      */
-    fun <T> create(serviceClass: Class<T>): T = retrofit.create(serviceClass)
+    fun <T> create(serviceClass: Class<T>, baseUrl: String = appBaseUrl): T =
+        retrofitBuilder(baseUrl).create(serviceClass)
 
     /**
      * ServiceBuilder.create<LoginService>()
      */
-    inline fun <reified T> create(): T = create(T::class.java)
+    inline fun <reified T> create(baseUrl: String = appBaseUrl): T = create(T::class.java, baseUrl)
 
-    /**
-     * 检测 url 连通性并回调一个 boolean 值
-     */
-    fun ping(url: String, callback: (Boolean) -> Unit) = PingModel(url).ping { callback(it) }
+    fun <T> Call<T>.getUrl(): String = request().url().toString()
 
     /**
      * 异步方法
@@ -108,14 +94,14 @@ object ServiceBuilder {
         crossinline onSuccess: (data: T?) -> Unit,
         crossinline onError: ((code: Int?, msg: String) -> Unit)
     ) = call.enqueue(object : Callback<T> {
-        val url = call.request().url().toString()
+        val url = call.getUrl()
 
         override fun onResponse(call: Call<T>, response: Response<T>) {
             handleResponse(response, onSuccess, onError, url)
         }
 
         override fun onFailure(call: Call<T>, t: Throwable) {
-            if (enableLogger) logE(TAG, "failed at: $url\n${t.message}\n${t.stackTrace}")
+            logE(TAG, "failed at: $url\n${t.message}\n${t.stackTrace}")
             onError(null, t.message ?: "Unknown error")
         }
     })
@@ -133,7 +119,7 @@ object ServiceBuilder {
         crossinline onSuccess: (data: T?) -> Unit,
         crossinline onError: ((code: Int?, msg: String) -> Unit)
     ) {
-        val url = call.request().url().toString()
+        val url = call.getUrl()
         handleResponse(call.execute(), onSuccess, onError, url)
     }
 
@@ -150,7 +136,7 @@ object ServiceBuilder {
         crossinline onSuccess: (data: T?) -> Unit,
         crossinline onError: ((code: Int?, msg: String) -> Unit)
     ) = withContext(Dispatchers.IO) {
-        val url = call.request().url().toString()
+        val url = call.getUrl()
         handleResponse(call.awaitResponse(), onSuccess, onError, url)
     }
 
@@ -163,18 +149,19 @@ object ServiceBuilder {
         response.run {
             when {
                 isSuccessful -> {
-                    if (enableLogger) logD(TAG, "success: $url")
+                    logD(TAG, "success: $url")
                     onSuccess(body())
                 } // 成功
 
                 else -> {
-                    if (enableLogger) logE(TAG, "failed at: $url")
-                    onError(code(), message() ?: "Unknown error")
+                    val msg = errorBody().toPrettyJson() // 优先将 error body 转 json 输出
+                    logE(TAG, "failed at: $url\n$msg")
+                    onError(code(), msg.ifBlank { message() ?: "Unknown error" })
                 } // 其他失败情况
             }
         }
     } catch (e: Exception) {
-        if (enableLogger) logE(TAG, "failed at: $url\n${e.message}\n${e.stackTrace}")
+        logE(TAG, "failed at: $url\n${e.message}\n${e.stackTrace}")
         onError(null, e.message ?: "Unknown error")
     }
 }
