@@ -50,7 +50,7 @@ object ServiceBuilder {
     private var CONNECT_TIMEOUT_SET = 7L
     private const val READ_TIMEOUT_SET = 15L
 
-    private val client: OkHttpClient by lazy {
+    val client: OkHttpClient by lazy {
         OkHttpClient.Builder()
             .readTimeout(READ_TIMEOUT_SET, TimeUnit.SECONDS)
             .connectTimeout(CONNECT_TIMEOUT_SET, TimeUnit.SECONDS)

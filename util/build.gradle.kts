@@ -44,6 +44,7 @@ afterEvaluate {
 }
 
 dependencies {
+    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
     implementation(libs.retrofit)
     implementation(libs.github.glide)
     implementation(libs.converter.gson)
