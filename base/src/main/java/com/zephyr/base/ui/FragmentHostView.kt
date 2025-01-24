@@ -3,7 +3,10 @@ package com.zephyr.base.ui
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import com.zephyr.base.log.logE
+import kotlin.collections.set
 
 /**
  * 具有 fragment 管理能力的 view
@@ -16,9 +19,10 @@ class FragmentHostView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
+    private var TAG: String = this::class.java.simpleName
 
-    interface OnHostChangeListener {
-        fun onHostChanged(newHost: FragmentHost?, newIndex: Int)
+    fun interface OnHostChangeListener {
+        fun onChanged(newHost: FragmentHost?, newIndex: Int)
     }
 
     private var listener: OnHostChangeListener? = null
@@ -29,6 +33,12 @@ class FragmentHostView @JvmOverloads constructor(
                 value?.let { host.fragmentManager = it }
             }
             field = value
+        }
+        get() {
+            if (field?.isDestroyed == true) {
+                field = null
+            }
+            return field
         }
 
     private var _map: HashMap<Int, FragmentHost> = hashMapOf()
@@ -42,14 +52,15 @@ class FragmentHostView @JvmOverloads constructor(
             field = value
         }
 
-    fun getActiveHost() = _map[activeIndex]
-    private fun getLastHost() = _map[lastIndex]
+    fun getActiveHost() = getHost(activeIndex)
+    private fun getLastHost() = getHost(lastIndex)
+    private fun getHost(index: Int?) = _map[index]
 
     private fun restoreStack() = _map.values.forEach { host ->
         host.recreateFragments(fragmentManager!!)
     }
 
-    fun setOnHostChangeListener(l: OnHostChangeListener) {
+    fun setOnHostChangeListener(l: OnHostChangeListener?) {
         listener = l
     }
 
@@ -59,28 +70,50 @@ class FragmentHostView @JvmOverloads constructor(
         switchHost(targetHost)
     }
 
-    fun addHost(index: Int, action: FragmentHost.() -> Unit): FragmentHost {
-        FragmentHost(id).let {
-            it.fragmentManager = fragmentManager!!
-            it.action()
-            _map[index] = it
+    private fun createHost(): FragmentHost {
+        return FragmentHost(id).apply {
+            fragmentManager = this@FragmentHostView.fragmentManager
+        }
+    }
+
+    fun addHost(index: Int, tag: String, clazz: Class<out Fragment>): FragmentHost {
+        return createHost().apply {
+            pushFragment(tag, clazz)
+            _map[index] = this
             switchHost(index)
-            return it
+        }
+    }
+
+    fun addHost(index: Int, tag: String, fragment: Fragment): FragmentHost {
+        return createHost().apply {
+            pushFragment(tag, fragment)
+            _map[index] = this
+            switchHost(index)
+        }
+    }
+
+    fun addHost(index: Int): FragmentHost {
+        return createHost().apply {
+            _map[index] = this
+            switchHost(index)
         }
     }
 
     fun switchHost(index: Int, enter: Int = 0, exit: Int = 0) {
         if (_map.keys.any { it == index }) {
-            activeIndex = index
+            var host: FragmentHost? = null
             fragmentManager?.beginTransaction()?.apply {
                 setCustomAnimations(enter, exit)
-                getLastHost()?.hideTransaction(this)
-                getActiveHost()?.let {
-                    listener?.onHostChanged(it, index)
+                getActiveHost()?.hideTransaction(this)
+                getHost(index)?.let {
+                    host = it
                     it.showTransaction(this)
                 }
-            }?.commit()
-            fragmentManager?.executePendingTransactions()
+
+            }?.commitNow()
+            activeIndex = index
+            logE(TAG, "切换 host 从 $lastIndex 到 $activeIndex")
+            listener?.onChanged(host, index)
         }
     }
 }

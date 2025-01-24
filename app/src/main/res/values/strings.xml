@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Zephyr demo</string>
+    <string name="_1st">1st</string>
+    <string name="_2th">2th</string>
+    <string name="_3rd">3rd</string>
+    <string name="press_me">press me</string>
+</resources>

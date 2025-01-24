@@ -16,6 +16,8 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.PagerSnapHelper
@@ -38,6 +40,28 @@ val Activity.TAG
     get() = this::class.simpleName!!
 val Fragment.TAG
     get() = this::class.simpleName!!
+
+fun Activity.restartApplication() {
+    packageManager.getLaunchIntentForPackage(packageName)?.run {
+        this.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        startActivity(this)
+        Runtime.getRuntime().exit(0)
+    }
+}
+
+fun Fragment.restartApplication() {
+    requireActivity().restartApplication()
+}
+
+fun Activity.showStatusBar() {
+    WindowCompat.getInsetsController(window, window.decorView)
+        .show(WindowInsetsCompat.Type.systemBars())
+}
+
+fun Activity.hideStatusBar() {
+    WindowCompat.getInsetsController(window, window.decorView)
+        .hide(WindowInsetsCompat.Type.systemBars())
+}
 
 fun View.setSize(size: Int) = setSize(size, size)
 
