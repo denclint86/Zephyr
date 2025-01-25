@@ -39,14 +39,19 @@ abstract class ViewBindingListAdapter<VB : ViewDataBinding, D>(
      *
      * 不再需要写 "executePendingBindings()"
      */
-    abstract fun VB.onBindViewHolder(data: D, position: Int)
+    abstract fun VB.onBindViewHolder(data: D?, position: Int)
 
     /**
      * 不需要再重写
      */
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         with(holder.binding) {
-            onBindViewHolder(getItem(position), position)
+            val item = try {
+                getItem(position)
+            } catch (_: Exception) {
+                null
+            }
+            onBindViewHolder(item, position)
             executePendingBindings()
         }
     }

@@ -9,11 +9,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsets
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
@@ -29,12 +32,55 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.zephyr.base.appContext
-import com.zephyr.base.ui.FragmentHost
-import com.zephyr.base.ui.FragmentHostView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 private const val RADIUS = 25
+
+fun Drawable?.copy(): Drawable? = this?.constantState?.newDrawable()?.mutate()
+
+
+fun Context.getRootWidth(): Int {
+    return resources.displayMetrics.widthPixels
+}
+
+fun Context.getRootHeight(): Int {
+    return resources.displayMetrics.heightPixels
+}
+
+@RequiresApi(Build.VERSION_CODES.R)
+fun Activity.calculateStatusBarHeight(): Int {
+    val windowMetrics = windowManager.currentWindowMetrics
+    val insets = windowMetrics.windowInsets
+        .getInsetsIgnoringVisibility(WindowInsets.Type.systemBars())
+    return insets.top
+}
+
+@RequiresApi(Build.VERSION_CODES.R)
+fun Activity.calculateNavigationBarHeight(): Int {
+    val windowMetrics = windowManager.currentWindowMetrics
+    val insets = windowMetrics.windowInsets
+        .getInsetsIgnoringVisibility(WindowInsets.Type.systemBars())
+    return insets.bottom
+}
+
+fun Activity.getScreenHeight(): Int {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        val windowMetrics = windowManager.currentWindowMetrics
+        return windowMetrics.bounds.height()
+    } else {
+        return getRootHeight()
+    }
+}
+
+fun Activity.getScreenWidth(): Int {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        val windowMetrics = windowManager.currentWindowMetrics
+        return windowMetrics.bounds.width()
+    } else {
+        return getRootWidth()
+    }
+}
 
 val Activity.TAG
     get() = this::class.simpleName!!
@@ -110,21 +156,6 @@ fun Activity.roadApp() {
         startActivity(this)
         Runtime.getRuntime().exit(0)
     }
-}
-
-@Deprecated("")
-fun Fragment.findHost(): FragmentHost? {
-    var view = view
-    var parent = view?.parent
-
-    while (parent != null) {
-        if (parent is FragmentHostView) {
-            return parent.getActiveHost()
-        }
-        view = parent as? View // as? 如果转换失败则变为 null
-        parent = view?.parent
-    }
-    return null
 }
 
 @SuppressLint("CheckResult")
