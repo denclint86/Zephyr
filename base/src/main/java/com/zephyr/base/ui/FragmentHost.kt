@@ -15,7 +15,6 @@ fun Fragment.findHost(): FragmentHost? {
     if (pair?.first == tag) // 防止一些情况下压入 fragment 到错误的栈中
         return host
 
-    logE("", "${pair.toString()} ${this::class.java} $tag")
     return null
 }
 
@@ -152,7 +151,7 @@ open class FragmentHost(
      * 弹出栈顶的 fragment
      */
     fun popFragment(enter: Int = 0, exit: Int = 0): Boolean {
-        if (!empty())
+        if (empty())
             return false
 
         beginTransaction {
