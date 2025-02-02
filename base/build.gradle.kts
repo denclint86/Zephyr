@@ -14,9 +14,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
-    buildFeatures {
-        dataBinding = true
-    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -47,19 +45,6 @@ afterEvaluate {
 
 dependencies {
     implementation(libs.github.glide)
-
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
-
-    implementation(libs.androidx.recyclerview)
-
     implementation(libs.material)
-
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.window)
-    implementation(libs.androidx.activity)
-    implementation(libs.androidx.constraintlayout)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
 }

@@ -44,18 +44,11 @@ afterEvaluate {
 }
 
 dependencies {
-    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
-    implementation(libs.retrofit)
-    implementation(libs.github.glide)
-    implementation(libs.converter.gson)
-
     implementation(project(":base"))
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
+    implementation(libs.converter.gson)
+    implementation(libs.converter.scalars)
+    implementation(libs.retrofit)
+
     implementation(libs.androidx.datastore)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
 }
