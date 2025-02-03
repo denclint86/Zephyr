@@ -77,12 +77,14 @@ object ServiceBuilder {
      * example:
      * ServiceBuilder.create(LoginService::class.java)
      */
+    @JvmName("create1")
     fun <T> create(serviceClass: Class<T>, baseUrl: String = appBaseUrl): T =
         retrofitBuilder(baseUrl).create(serviceClass)
 
     /**
      * ServiceBuilder.create<LoginService>()
      */
+    @JvmName("create2")
     inline fun <reified T> create(baseUrl: String = appBaseUrl): T = create(T::class.java, baseUrl)
 
     fun <T> Call<T>.getUrl(): String = request().url().toString()
@@ -91,6 +93,7 @@ object ServiceBuilder {
     /**
      * 同步请求方法
      */
+    @JvmName("requestExecute1")
     inline fun <reified T> Call<T>.requestExecute(
         crossinline callback: (NetResult<T>) -> Unit
     ) = try {
@@ -103,6 +106,7 @@ object ServiceBuilder {
     /**
      * 异步请求方法
      */
+    @JvmName("requestEnqueue1")
     inline fun <reified T> Call<T>.requestEnqueue(
         crossinline callback: (NetResult<T>) -> Unit
     ) = enqueue(object : Callback<T> {
@@ -118,6 +122,7 @@ object ServiceBuilder {
     /**
      * 挂起请求方法
      */
+    @JvmName("requestSuspend1")
     suspend inline fun <reified T> Call<T>.requestSuspend(
         crossinline callback: (NetResult<T>) -> Unit
     ) = withContext(Dispatchers.IO) {
@@ -129,22 +134,23 @@ object ServiceBuilder {
         }
     }
 
+    @JvmName("requestExecute2")
     inline fun <reified T> requestExecute(
         call: Call<T>,
         crossinline callback: (NetResult<T>) -> Unit
     ) = call.requestExecute(callback)
 
+    @JvmName("requestEnqueue2")
     inline fun <reified T> requestEnqueue(
         call: Call<T>,
         crossinline callback: (NetResult<T>) -> Unit
     ) = call.requestEnqueue(callback)
 
+    @JvmName("requestSuspend2")
     suspend inline fun <reified T> requestSuspend(
         call: Call<T>,
         crossinline callback: (NetResult<T>) -> Unit
     ) = call.requestSuspend(callback)
-
-
 
 
     inline fun <reified T> Call<T>.handleOnResponse(
