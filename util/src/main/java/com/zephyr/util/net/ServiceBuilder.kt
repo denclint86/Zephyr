@@ -89,11 +89,19 @@ object ServiceBuilder {
 
 private const val TAG = "net request"
 
-fun <T> Call<T>.getUrl(): String = request().url().toString()
+private fun <T> Call<T>.getUrl(): String = request().url().toString()
 
 inline fun <T> NetResult<T>.handleResult(
     crossinline onSuccess: (T?) -> Unit,
     crossinline onError: (Int?, String) -> Unit
+) = when (this) {
+    is Success -> onSuccess(data)
+    is Error -> onError(code, msg)
+}
+
+suspend inline fun <T> NetResult<T>.handleResultSuspend(
+    crossinline onSuccess: suspend (T?) -> Unit,
+    crossinline onError: suspend (Int?, String) -> Unit
 ) = when (this) {
     is Success -> onSuccess(data)
     is Error -> onError(code, msg)
@@ -162,7 +170,7 @@ suspend fun <T> requestSuspend(
 ) = call.requestSuspend(callback)
 
 
-fun <T> Call<T>.handleOnResponse(
+private fun <T> Call<T>.handleOnResponse(
     response: Response<T>?,
     callback: (NetResult<T>) -> Unit
 ) = response?.run {
@@ -184,7 +192,7 @@ fun <T> Call<T>.handleOnResponse(
     }
 } ?: callback(Error(null, "response is null"))
 
-fun <T> Call<T>.handleOnFailure(
+private fun <T> Call<T>.handleOnFailure(
     throwable: Throwable?,
     callback: (NetResult<T>) -> Unit
 ) {
