@@ -132,8 +132,8 @@ open class LoggerClass {
     /**
      * 必须在 application 中启动
      */
-    fun Application.startLogger(
-        context: Context,
+    fun startLogger(
+        context: Application,
         logLevel: Int
     ) = runCatching {
         appContext = context

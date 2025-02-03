@@ -29,29 +29,45 @@ abstract class MVIViewModel<Intent, State, Effect> : ViewModel() {
 
     init {
         viewModelScope.launch {
-            channel.consumeAsFlow().collect { handleIntent(it) }
+            channel.consumeAsFlow().collect { intent -> handleIntent(intent) }
         }
     }
 
+    /**
+     * viewmodel 更新 state
+     *
+     * view 需要 observeState 才能观察到
+     */
     protected fun updateState(update: State.() -> State) =
         _stateFlow.update(update)
 
+    /**
+     * view 对 viewmodel 发送数据
+     */
     fun sendIntent(intent: Intent) =
         viewModelScope.launch {
             channel.send(intent)
         }
 
+    /**
+     * view 用于观察 state 的变化
+     */
     fun observeState(observe: Flow<State>.() -> Unit) = observe(uiStateFlow)
 
-    protected fun sendEffect(builder: suspend () -> Effect?) = viewModelScope.launch {
-        builder()?.let {
-            _effectFlow.emit(it)
-        }
-    }
+    /**
+     * viewmodel 对 view 发送数据
+     *
+     * view 需要对 effectFlow collect
+     */
+    protected fun sendEffect(effect: Effect) = viewModelScope.launch { _effectFlow.emit(effect) }
 
-    protected suspend fun sendEffect(effect: Effect) = _effectFlow.emit(effect)
-
+    /**
+     * state 初始化
+     */
     protected abstract fun initUiState(): State
 
+    /**
+     * channel 接收并处理 intent
+     */
     protected abstract fun handleIntent(intent: Intent)
 }

@@ -26,12 +26,12 @@ abstract class ViewBindingFragment<VB : ViewDataBinding> : Fragment(),
     abstract fun VB.initBinding()
 
     override fun onAttach(context: Context) {
-        logI(TAG, "$TAG onAttach", false)
+        logI(TAG, "$TAG: onAttach")
         super.onAttach(context)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        logI(TAG, "$TAG onCreate", false)
+        logI(TAG, "$TAG: onCreate")
         super.onCreate(savedInstanceState)
     }
 
@@ -40,34 +40,34 @@ abstract class ViewBindingFragment<VB : ViewDataBinding> : Fragment(),
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        logI(TAG, "$TAG onCreateView", false)
+        logI(TAG, "$TAG: onCreateView")
         _binding = getViewBinding(inflater, container)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        logI(TAG, "$TAG onViewCreated", false)
+        logI(TAG, "$TAG: onViewCreated")
         super.onViewCreated(view, savedInstanceState)
         binding.initBinding()
     }
 
     override fun onStart() {
-        logI(TAG, "$TAG onStart", false)
+        logI(TAG, "$TAG: onStart")
         super.onStart()
     }
 
     override fun onResume() {
-        logI(TAG, "$TAG onResume", false)
+        logI(TAG, "$TAG: onResume")
         super.onResume()
     }
 
     override fun onPause() {
-        logI(TAG, "$TAG onPause", false)
+        logI(TAG, "$TAG: onPause")
         super.onPause()
     }
 
     override fun onStop() {
-        logI(TAG, "$TAG onStop", false)
+        logI(TAG, "$TAG: onStop")
         super.onStop()
     }
 
@@ -75,14 +75,14 @@ abstract class ViewBindingFragment<VB : ViewDataBinding> : Fragment(),
      * 防止内存泄漏
      */
     override fun onDestroyView() {
-        logI(TAG, "$TAG onDestroyView", false)
+        logI(TAG, "$TAG: onDestroyView")
         super.onDestroyView()
         _binding?.unbind()
         _binding = null
     }
 
     override fun onDestroy() {
-        logI(TAG, "$TAG onDestroy", false)
+        logI(TAG, "$TAG: onDestroy")
         super.onDestroy()
     }
 }
