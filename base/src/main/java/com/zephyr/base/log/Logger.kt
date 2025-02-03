@@ -11,7 +11,6 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import com.zephyr.base.appContext
-import com.zephyr.base.extension.getFunctionName
 import com.zephyr.base.extension.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -145,8 +144,7 @@ open class LoggerClass {
             "Logger 启动失败".toast()
     }
 
-
-    fun setLogLevel(newLevel: Int) =
+    protected fun setLogLevel(newLevel: Int) =
         when (newLevel) {
             in VERBOSE..ERROR -> {
                 LOG_LEVEL = newLevel
@@ -280,51 +278,46 @@ open class LoggerClass {
  */
 object Logger : LoggerClass()
 
-inline fun logV(tag: String = "", msg: String = "", getFunctionName: Boolean = true) =
+inline fun logV(tag: String = "", msg: String = "") =
     with(VERBOSE) {
         if (LOG_LEVEL <= this) {
-            val str =
-                if (getFunctionName) LOG_HEADER + getFunctionName() + msg else LOG_HEADER + msg
+            val str = LOG_HEADER + msg
             Log.v(tag, str)
             Logger.appendLog(getName(this), tag, str)
         }
     }
 
-inline fun logD(tag: String = "", msg: String = "", getFunctionName: Boolean = true) =
+inline fun logD(tag: String = "", msg: String = "") =
     with(DEBUG) {
         if (LOG_LEVEL <= this) {
-            val str =
-                if (getFunctionName) LOG_HEADER + getFunctionName() + msg else LOG_HEADER + msg
+            val str = LOG_HEADER + msg
             Log.d(tag, str)
             Logger.appendLog(getName(this), tag, str)
         }
     }
 
-inline fun logI(tag: String = "", msg: String = "", getFunctionName: Boolean = true) =
+inline fun logI(tag: String = "", msg: String = "") =
     with(INFO) {
         if (LOG_LEVEL <= this) {
-            val str =
-                if (getFunctionName) LOG_HEADER + getFunctionName() + msg else LOG_HEADER + msg
+            val str = LOG_HEADER + msg
             Log.i(tag, str)
             Logger.appendLog(getName(this), tag, str)
         }
     }
 
-inline fun logW(tag: String = "", msg: String = "", getFunctionName: Boolean = true) =
+inline fun logW(tag: String = "", msg: String = "") =
     with(WARN) {
         if (LOG_LEVEL <= this) {
-            val str =
-                if (getFunctionName) LOG_HEADER + getFunctionName() + msg else LOG_HEADER + msg
+            val str = LOG_HEADER + msg
             Log.w(tag, str)
             Logger.appendLog(getName(this), tag, str)
         }
     }
 
-inline fun logE(tag: String = "", msg: String = "", getFunctionName: Boolean = true) =
+inline fun logE(tag: String = "", msg: String = "") =
     with(ERROR) {
         if (LOG_LEVEL <= this) {
-            val str =
-                if (getFunctionName) LOG_HEADER + getFunctionName() + msg else LOG_HEADER + msg
+            val str = LOG_HEADER + msg
             Log.e(tag, str)
             Logger.appendLog(getName(this), tag, str)
         }
