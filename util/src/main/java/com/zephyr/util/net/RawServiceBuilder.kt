@@ -1,7 +1,7 @@
-package com.zephyr.util
+package com.zephyr.util.net
 
 import com.zephyr.base.appBaseUrl
-import com.zephyr.util.ServiceBuilder.client
+import com.zephyr.util.net.ServiceBuilder.client
 import retrofit2.Retrofit
 import retrofit2.converter.scalars.ScalarsConverterFactory
 
