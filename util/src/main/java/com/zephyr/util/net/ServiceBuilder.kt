@@ -29,7 +29,7 @@ private class PingModel(private val baseUrl: String) {
     }
 
     inline fun ping(crossinline callback: (Boolean) -> Unit) {
-        ServiceBuilder.requestEnqueue(service.ping()) { c ->
+        requestEnqueue(service.ping()) { c ->
             when (c) {
                 is Error -> {}
                 is Success -> {}
@@ -40,7 +40,7 @@ private class PingModel(private val baseUrl: String) {
 }
 
 /**
- * 网络请求的封装, 含同步异步的请求方法
+ * 可以直接通过它创建简单的 service
  *
  * baseurl: 在 application 中设置 appBaseUrl
  * enableLogger: 设置为真后可以打印每个请求的日志
@@ -50,15 +50,13 @@ private class PingModel(private val baseUrl: String) {
  */
 object ServiceBuilder {
 
-    val TAG = this::class.java.simpleName
-
-    private var CONNECT_TIMEOUT_SET = 15L
-    private const val READ_TIMEOUT_SET = 10L
+    private const val READ_TIMEOUT = 15L
+    private var CONNECT_TIMEOUT = 30L
 
     val client: OkHttpClient by lazy {
         OkHttpClient.Builder()
-            .readTimeout(READ_TIMEOUT_SET, TimeUnit.SECONDS)
-            .connectTimeout(CONNECT_TIMEOUT_SET, TimeUnit.SECONDS)
+            .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
+            .connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
             .build()
     }
 
@@ -86,104 +84,114 @@ object ServiceBuilder {
      */
     @JvmName("create2")
     inline fun <reified T> create(baseUrl: String = appBaseUrl): T = create(T::class.java, baseUrl)
+}
 
-    fun <T> Call<T>.getUrl(): String = request().url().toString()
 
+private const val TAG = "net request"
 
-    /**
-     * 同步请求方法
-     */
-    @JvmName("requestExecute1")
-    inline fun <reified T> Call<T>.requestExecute(
-        crossinline callback: (NetResult<T>) -> Unit
-    ) = try {
-        val response = execute()
+fun <T> Call<T>.getUrl(): String = request().url().toString()
+
+inline fun <T> NetResult<T>.handleResult(
+    crossinline onSuccess: (T?) -> Unit,
+    crossinline onError: (Int?, String) -> Unit
+) = when (this) {
+    is Success -> onSuccess(data)
+    is Error -> onError(code, msg)
+}
+
+/**
+ * 同步请求方法
+ */
+@JvmName("requestExecute1")
+fun <T> Call<T>.requestExecute(
+    callback: (NetResult<T>) -> Unit
+) = try {
+    val response = execute()
+    handleOnResponse(response, callback)
+} catch (t: Throwable) {
+    handleOnFailure(t, callback)
+}
+
+/**
+ * 异步请求方法
+ */
+@JvmName("requestEnqueue1")
+fun <T> Call<T>.requestEnqueue(
+    callback: (NetResult<T>) -> Unit
+) = enqueue(object : Callback<T> {
+    override fun onResponse(call: Call<T>, response: Response<T>) {
+        handleOnResponse(response, callback)
+    }
+
+    override fun onFailure(call: Call<T>, throwable: Throwable) {
+        handleOnFailure(throwable, callback)
+    }
+})
+
+/**
+ * 挂起请求方法
+ */
+@JvmName("requestSuspend1")
+suspend fun <T> Call<T>.requestSuspend(
+    callback: (NetResult<T>) -> Unit
+) = withContext(Dispatchers.IO) {
+    try {
+        val response = awaitResponse()
         handleOnResponse(response, callback)
     } catch (t: Throwable) {
         handleOnFailure(t, callback)
     }
+}
 
-    /**
-     * 异步请求方法
-     */
-    @JvmName("requestEnqueue1")
-    inline fun <reified T> Call<T>.requestEnqueue(
-        crossinline callback: (NetResult<T>) -> Unit
-    ) = enqueue(object : Callback<T> {
-        override fun onResponse(call: Call<T>, response: Response<T>) {
-            handleOnResponse(response, callback)
-        }
+@JvmName("requestExecute2")
+fun <T> requestExecute(
+    call: Call<T>,
+    callback: (NetResult<T>) -> Unit
+) = call.requestExecute(callback)
 
-        override fun onFailure(call: Call<T>, throwable: Throwable) {
-            handleOnFailure(throwable, callback)
-        }
-    })
+@JvmName("requestEnqueue2")
+fun <T> requestEnqueue(
+    call: Call<T>,
+    callback: (NetResult<T>) -> Unit
+) = call.requestEnqueue(callback)
 
-    /**
-     * 挂起请求方法
-     */
-    @JvmName("requestSuspend1")
-    suspend inline fun <reified T> Call<T>.requestSuspend(
-        crossinline callback: (NetResult<T>) -> Unit
-    ) = withContext(Dispatchers.IO) {
-        try {
-            val response = awaitResponse()
-            handleOnResponse(response, callback)
-        } catch (t: Throwable) {
-            handleOnFailure(t, callback)
-        }
+@JvmName("requestSuspend2")
+suspend fun <T> requestSuspend(
+    call: Call<T>,
+    callback: (NetResult<T>) -> Unit
+) = call.requestSuspend(callback)
+
+
+fun <T> Call<T>.handleOnResponse(
+    response: Response<T>?,
+    callback: (NetResult<T>) -> Unit
+) = response?.run {
+    val url = getUrl()
+    when {
+        isSuccessful -> {
+            logD(TAG, "[${code()}]request succeed:\n$url")
+            logD(TAG, "body:\n${body().toPrettyJson()}")
+            callback(Success(body()))
+        } // 成功
+
+        else -> {
+            val errorBodyString = errorBody().toPrettyJson()
+            logE(TAG, "[${code()}]request failed at:\n $url")
+            logE(TAG, "error body:\n${errorBodyString}")
+            val errorString = errorBodyString.ifBlank { message() ?: "Unknown error" }
+            callback(Error(code(), errorString))
+        } // 其他失败情况
     }
+} ?: callback(Error(null, "response is null"))
 
-    @JvmName("requestExecute2")
-    inline fun <reified T> requestExecute(
-        call: Call<T>,
-        crossinline callback: (NetResult<T>) -> Unit
-    ) = call.requestExecute(callback)
-
-    @JvmName("requestEnqueue2")
-    inline fun <reified T> requestEnqueue(
-        call: Call<T>,
-        crossinline callback: (NetResult<T>) -> Unit
-    ) = call.requestEnqueue(callback)
-
-    @JvmName("requestSuspend2")
-    suspend inline fun <reified T> requestSuspend(
-        call: Call<T>,
-        crossinline callback: (NetResult<T>) -> Unit
-    ) = call.requestSuspend(callback)
-
-
-    inline fun <reified T> Call<T>.handleOnResponse(
-        response: Response<T>?,
-        crossinline callback: (NetResult<T>) -> Unit
-    ) = response?.run {
-        val url = getUrl()
-        when {
-            isSuccessful -> {
-                logD(TAG, "[${code()}]request succeed:\n$url")
-                logD(TAG, "body:\n${body().toPrettyJson()}")
-                callback(Success(body()))
-            } // 成功
-
-            else -> {
-                val errorBodyString = errorBody().toPrettyJson()
-                logE(TAG, "[${code()}]request failed at:\n $url")
-                logE(TAG, "error body:\n${errorBodyString}")
-                val errorString = errorBodyString.ifBlank { message() ?: "Unknown error" }
-                callback(Error(code(), errorString))
-            } // 其他失败情况
-        }
-    } ?: callback(Error(null, "response is null"))
-
-    inline fun <reified T> Call<T>.handleOnFailure(
-        throwable: Throwable?,
-        crossinline callback: (NetResult<T>) -> Unit
-    ) {
-        if (throwable == null) return
-        val url = getUrl()
-        val throwableString = throwable.toLogString()
-        logE(TAG, "failed at:\n$url")
-        logE(TAG, "\nthrowable:\n$throwableString")
-        callback(Error(null, throwableString))
-    }
+fun <T> Call<T>.handleOnFailure(
+    throwable: Throwable?,
+    callback: (NetResult<T>) -> Unit
+) {
+    if (throwable == null) return
+    val url = getUrl()
+    val throwableString = throwable.toLogString()
+    logE(TAG, "failed at:\n$url")
+    logE(TAG, "\nthrowable:\n$throwableString")
+    callback(Error(null, throwableString))
 }
