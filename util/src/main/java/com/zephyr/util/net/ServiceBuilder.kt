@@ -136,6 +136,8 @@ fun <T> Call<T>.requestEnqueue(
     }
 })
 
+var requestShowJson = false
+
 /**
  * 挂起请求方法
  */
@@ -178,14 +180,16 @@ private fun <T> Call<T>.handleOnResponse(
     when {
         isSuccessful -> {
             logD(TAG, "[${code()}] request succeed:\n$url")
-            logD(TAG, "body:\n${body().toPrettyJson()}")
+            if (requestShowJson)
+                logD(TAG, "body:\n${body().toPrettyJson()}")
             callback(Success(body()))
         } // 成功
 
         else -> {
             val errorBodyString = (errorBody()?.string() ?: "").toPrettyJson()
             logE(TAG, "[${code()}] request failed at:\n$url")
-            logE(TAG, "error body:\n${errorBodyString}")
+            if (requestShowJson)
+                logE(TAG, "error body:\n${errorBodyString}")
             val errorString = errorBodyString.ifBlank { message() ?: "Unknown error" }
             callback(Error(code(), errorString))
         } // 其他失败情况
