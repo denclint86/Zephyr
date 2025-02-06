@@ -31,20 +31,18 @@ object IPSetter {
      */
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     fun registerReceiver() = with(IntentFilter()) {
-        if (appContext == null) return@with
         addAction(WifiManager.WIFI_STATE_CHANGED_ACTION)
         addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION)
         addAction(ConnectivityManager.CONNECTIVITY_ACTION)
-        appContext!!.registerReceiver(
+        appContext.registerReceiver(
             receiver, this,
             Context.RECEIVER_NOT_EXPORTED
         )
     }
 
     fun unregisterReceiver() {
-        if (appContext == null) return
         runCatching {
-            appContext!!.unregisterReceiver(receiver)
+            appContext.unregisterReceiver(receiver)
         }
     }
 
@@ -53,13 +51,12 @@ object IPSetter {
      */
     private fun getIp(): String {
         var ip = "0.0.0.0"
-        if (appContext == null) return ip
 
         try {
             val wifiManager: WifiManager =
-                appContext!!.getSystemService(Context.WIFI_SERVICE) as WifiManager
+                appContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
             val connectivityManager: ConnectivityManager =
-                appContext!!.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                appContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             if (wifiManager.isWifiEnabled) {
                 val network = connectivityManager.activeNetwork ?: return ip
                 val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return ip

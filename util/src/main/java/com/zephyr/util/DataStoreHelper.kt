@@ -21,7 +21,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
  * 全局都可获取的 DataStore 实例
  */
 val dataStoreInstance: DataStore<Preferences> by lazy {
-    appContext!!.dataStore
+    appContext.dataStore
 }
 
 /**

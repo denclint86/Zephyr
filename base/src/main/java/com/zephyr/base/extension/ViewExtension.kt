@@ -217,7 +217,7 @@ suspend fun toastSuspended(
 }
 
 fun toast(msg: String, cancelLast: Boolean = true, length: Int = Toast.LENGTH_SHORT) {
-    if (msg.isNotBlank() && appContext != null) {
+    if (msg.isNotBlank()) {
         if (cancelLast)
             Toast(appContext).cancel()
         Toast.makeText(appContext, msg, length).show()

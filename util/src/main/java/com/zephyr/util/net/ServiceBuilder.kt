@@ -91,21 +91,21 @@ private const val TAG = "net request"
 
 private fun <T> Call<T>.getUrl(): String = request().url().toString()
 
-inline fun <T> NetResult<T>.handleResult(
-    crossinline onSuccess: (T?) -> Unit,
-    crossinline onError: (Int?, String) -> Unit
-) = when (this) {
-    is Success -> onSuccess(data)
-    is Error -> onError(code, msg)
-}
-
-suspend inline fun <T> NetResult<T>.handleResultSuspend(
-    crossinline onSuccess: suspend (T?) -> Unit,
-    crossinline onError: suspend (Int?, String) -> Unit
-) = when (this) {
-    is Success -> onSuccess(data)
-    is Error -> onError(code, msg)
-}
+//inline fun <T> NetResult<T>.handleResult(
+//    crossinline onSuccess: (T?) -> Unit,
+//    crossinline onError: (Int?, String) -> Unit
+//) = when (this) {
+//    is Success -> onSuccess(data)
+//    is Error -> onError(code, msg)
+//}
+//
+//suspend inline fun <T> NetResult<T>.handleResultSuspend(
+//    crossinline onSuccess: suspend (T?) -> Unit,
+//    crossinline onError: suspend (Int?, String) -> Unit
+//) = when (this) {
+//    is Success -> onSuccess(data)
+//    is Error -> onError(code, msg)
+//}
 
 /**
  * 同步请求方法
@@ -177,14 +177,14 @@ private fun <T> Call<T>.handleOnResponse(
     val url = getUrl()
     when {
         isSuccessful -> {
-            logD(TAG, "[${code()}]request succeed:\n$url")
+            logD(TAG, "[${code()}] request succeed:\n$url")
             logD(TAG, "body:\n${body().toPrettyJson()}")
             callback(Success(body()))
         } // 成功
 
         else -> {
-            val errorBodyString = errorBody().toPrettyJson()
-            logE(TAG, "[${code()}]request failed at:\n $url")
+            val errorBodyString = (errorBody()?.string() ?: "").toPrettyJson()
+            logE(TAG, "[${code()}] request failed at:\n$url")
             logE(TAG, "error body:\n${errorBodyString}")
             val errorString = errorBodyString.ifBlank { message() ?: "Unknown error" }
             callback(Error(code(), errorString))
@@ -199,7 +199,7 @@ private fun <T> Call<T>.handleOnFailure(
     if (throwable == null) return
     val url = getUrl()
     val throwableString = throwable.toLogString()
-    logE(TAG, "failed at:\n$url")
+    logE(TAG, "[] request failed at:\n$url")
     logE(TAG, "\nthrowable:\n$throwableString")
     callback(Error(null, throwableString))
 }

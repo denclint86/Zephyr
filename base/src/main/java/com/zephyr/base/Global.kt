@@ -1,20 +1,17 @@
 package com.zephyr.base
 
+import android.app.Application
 import android.content.Context
-import android.util.Log
 
 // 主要是一些拓展的函数
 
-var appContext: Context? = null
-    get() {
-        if (field == null) {
-            Log.e(
-                "Zephyr",
-                "你需要在 application 中为 'appContext' 赋值, 本依赖的部分方法十分依赖这个实例!"
-            )
-        }
-        return field
-    }
+private var _appContext: Context? = null
+val appContext: Context
+    get() = _appContext ?: throw Exception("需要先在 application 中为 'appContext' 赋值")
+
+fun Application.setAppContext(context: Context) {
+    _appContext = context
+}
 
 var appBaseUrl = ""
 var appIpAddress = ""

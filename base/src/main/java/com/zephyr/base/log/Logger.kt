@@ -4,7 +4,6 @@ package com.zephyr.base.log
 
 import android.app.Activity
 import android.app.Application
-import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.os.Handler
@@ -12,6 +11,7 @@ import android.os.Looper
 import android.util.Log
 import com.zephyr.base.appContext
 import com.zephyr.base.extension.toast
+import com.zephyr.base.setAppContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -38,6 +38,7 @@ const val SECOND = 1000L
 
 // 日志等级
 var LOG_LEVEL = DO_NOT_LOG
+var WRITE_LEVEL = DO_NOT_LOG
 
 // 是否启用自动删除
 var CLEAN_OLD = true
@@ -112,14 +113,14 @@ open class LoggerClass {
         appendLog(getName(ERROR), "UncaughtException", fullMsg)
         writeToFile()
 
-        if (crashActivity != null && appContext != null) {
+        if (crashActivity != null ) {
             Log.e(TAG, fullMsg)
 
             with(Intent(appContext, crashActivity)) {
                 putExtra("TITLE", title)
                 putExtra("DETAIL", detail)
                 setFlags(FLAG_ACTIVITY_NEW_TASK) // 不按返回栈规则启动的方式
-                appContext!!.startActivity(this)
+                appContext.startActivity(this)
             }
         } else {
             /**
@@ -136,10 +137,10 @@ open class LoggerClass {
         context: Application,
         logLevel: Int
     ) = runCatching {
-        appContext = context
+        context.setAppContext(context)
         setLogLevel(logLevel)
     }.onFailure {
-        appContext = context
+        context.setAppContext(context)
         if (LOG_LEVEL >= DEBUG)
             "Logger 启动失败".toast()
     }
@@ -167,8 +168,7 @@ open class LoggerClass {
 
 
     protected fun create() {
-        if (appContext == null) return
-        fileDir = File(appContext!!.getExternalFilesDir(null), FILE_PATH)
+        fileDir = File(appContext.getExternalFilesDir(null), FILE_PATH)
         if (!fileDir.exists()) {
             fileDir.mkdirs()
         }
