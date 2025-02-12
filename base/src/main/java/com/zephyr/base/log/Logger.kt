@@ -2,14 +2,12 @@
 
 package com.zephyr.base.log
 
-import android.app.Activity
 import android.app.Application
-import android.content.Intent
-import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import com.zephyr.base.appContext
+import com.zephyr.base.extension.toLogString
 import com.zephyr.base.extension.toast
 import com.zephyr.base.setAppContext
 import kotlinx.coroutines.CoroutineScope
@@ -26,23 +24,23 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-// 自用日志记录
-const val VERBOSE = 1
-const val DEBUG = 2
-const val INFO = 3
-const val WARN = 4
-const val ERROR = 5
-const val DO_NOT_LOG = 6
+enum class LogLevel(val v: Int, val text: String) {
+    VERBOSE(1, "Verbose"),
+    DEBUG(2, "Debug"),
+    INFO(3, "Information"),
+    WARN(4, "Warning"),
+    ERROR(5, "Error"),
+    DO_NOT_LOG(6, "Do_not_log")
+}
 
 const val SECOND = 1000L
 
 // 日志等级
-var LOG_LEVEL = DO_NOT_LOG
-var WRITE_LEVEL = DO_NOT_LOG
+var LOG_LEVEL = LogLevel.DO_NOT_LOG
 
 // 是否启用自动删除
 var CLEAN_OLD = true
-var DAYS_RETAINED = 2
+var DAYS_RETAINED = 4
 var HOURS_RETAINED = 0
 var MINUTES_RETAINED = 0
 var SECONDS_RETAINED = 0
@@ -58,19 +56,6 @@ var DATE_FORMAT = "yyyy年MM月dd日"
 var LOG_HEADER = ""
 var TIME_FORMAT = "MM/dd HH:mm:ss"
 
-private val levels = mapOf(
-    VERBOSE to "Verbose",
-    DEBUG to "Debug",
-    INFO to "Information",
-    WARN to "Warning",
-    ERROR to "Error",
-)
-
-/**
- * 获取等级对应的字符串
- */
-fun getName(level: Int): String = levels[level]!!
-
 open class LoggerClass {
     protected val TAG = this::class.simpleName!!
 
@@ -78,11 +63,6 @@ open class LoggerClass {
     protected lateinit var file: File
 
     protected var isCrashed = false
-
-    /**
-     * crash activity 功能需要在项目中注册您的崩溃 activity 并给 crashActivity 赋值
-     */
-    var crashActivity: Class<out Activity>? = null
 
     // 当前时间的格式
     protected var accurateTimeFormat = SimpleDateFormat(TIME_FORMAT, Locale.getDefault())
@@ -107,27 +87,17 @@ open class LoggerClass {
         isCrashed = true
 
         val title = thread.name
-        val detail = throwable.message + "\n" + throwable.stackTrace
-        val fullMsg = "at: ${title}\ndetails: $detail"
+        val detail = throwable.toLogString()
+        val fullMsg = "at:\n${title}\ndetails:\n$detail"
 
-        appendLog(getName(ERROR), "UncaughtException", fullMsg)
+        Log.e(TAG, fullMsg)
+        appendLog(LogLevel.ERROR, "UncaughtException", fullMsg)
         writeToFile()
 
-        if (crashActivity != null ) {
-            Log.e(TAG, fullMsg)
-
-            with(Intent(appContext, crashActivity)) {
-                putExtra("TITLE", title)
-                putExtra("DETAIL", detail)
-                setFlags(FLAG_ACTIVITY_NEW_TASK) // 不按返回栈规则启动的方式
-                appContext.startActivity(this)
-            }
-        } else {
-            /**
-             * 交给默认的 handler 接管
-             */
-            defaultHandler?.uncaughtException(thread, throwable)
-        }
+        /**
+         * 交给默认的 handler 接管
+         */
+        defaultHandler?.uncaughtException(thread, throwable)
     }
 
     /**
@@ -135,24 +105,24 @@ open class LoggerClass {
      */
     fun startLogger(
         context: Application,
-        logLevel: Int
+        logLevel: LogLevel
     ) = runCatching {
         context.setAppContext(context)
         setLogLevel(logLevel)
     }.onFailure {
         context.setAppContext(context)
-        if (LOG_LEVEL >= DEBUG)
+        if (LOG_LEVEL.v >= LogLevel.DEBUG.v)
             "Logger 启动失败".toast()
     }
 
-    protected fun setLogLevel(newLevel: Int) =
+    protected fun setLogLevel(newLevel: LogLevel) =
         when (newLevel) {
-            in VERBOSE..ERROR -> {
+            in LogLevel.VERBOSE..LogLevel.ERROR -> {
                 LOG_LEVEL = newLevel
                 init()
             }
 
-            DO_NOT_LOG -> LOG_LEVEL = newLevel
+            LogLevel.DO_NOT_LOG -> LOG_LEVEL = newLevel
             else -> throw Exception("log level should between VERBOSE and DO_NOT_LOG")
         }
 
@@ -204,9 +174,9 @@ open class LoggerClass {
         }
     }
 
-    fun appendLog(level: String, tag: String, message: String) {
+    fun appendLog(level: LogLevel, tag: String, message: String) {
         val currentTime = accurateTimeFormat.format(Date())
-        val logMessage = "$currentTime $level $tag\n$message\n"
+        val logMessage = "$currentTime ${level.text} $tag\n$message\n"
         logBuffer.append(logMessage)
     }
 
@@ -279,46 +249,46 @@ open class LoggerClass {
 object Logger : LoggerClass()
 
 inline fun logV(tag: String = "", msg: String = "") =
-    with(VERBOSE) {
-        if (LOG_LEVEL <= this) {
+    with(LogLevel.VERBOSE) {
+        if (LOG_LEVEL.v <= this.v) {
             val str = LOG_HEADER + msg
             Log.v(tag, str)
-            Logger.appendLog(getName(this), tag, str)
+            Logger.appendLog(this, tag, str)
         }
     }
 
 inline fun logD(tag: String = "", msg: String = "") =
-    with(DEBUG) {
-        if (LOG_LEVEL <= this) {
+    with(LogLevel.DEBUG) {
+        if (LOG_LEVEL.v <= this.v) {
             val str = LOG_HEADER + msg
             Log.d(tag, str)
-            Logger.appendLog(getName(this), tag, str)
+            Logger.appendLog(this, tag, str)
         }
     }
 
 inline fun logI(tag: String = "", msg: String = "") =
-    with(INFO) {
-        if (LOG_LEVEL <= this) {
+    with(LogLevel.INFO) {
+        if (LOG_LEVEL.v <= this.v) {
             val str = LOG_HEADER + msg
             Log.i(tag, str)
-            Logger.appendLog(getName(this), tag, str)
+            Logger.appendLog(this, tag, str)
         }
     }
 
 inline fun logW(tag: String = "", msg: String = "") =
-    with(WARN) {
-        if (LOG_LEVEL <= this) {
+    with(LogLevel.WARN) {
+        if (LOG_LEVEL.v <= this.v) {
             val str = LOG_HEADER + msg
             Log.w(tag, str)
-            Logger.appendLog(getName(this), tag, str)
+            Logger.appendLog(this, tag, str)
         }
     }
 
 inline fun logE(tag: String = "", msg: String = "") =
-    with(ERROR) {
-        if (LOG_LEVEL <= this) {
+    with(LogLevel.ERROR) {
+        if (LOG_LEVEL.v <= this.v) {
             val str = LOG_HEADER + msg
             Log.e(tag, str)
-            Logger.appendLog(getName(this), tag, str)
+            Logger.appendLog(this, tag, str)
         }
     }

@@ -1,13 +1,20 @@
 package com.zephyr.util.net
 
+import com.google.gson.Gson
 import com.zephyr.base.appBaseUrl
+import com.zephyr.base.extension.toLogString
 import com.zephyr.base.log.logD
 import com.zephyr.base.log.logE
-import com.zephyr.util.toLogString
+import com.zephyr.util.net.NetResult.Error
+import com.zephyr.util.net.NetResult.Success
 import com.zephyr.util.toPrettyJson
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -15,7 +22,11 @@ import retrofit2.Retrofit
 import retrofit2.awaitResponse
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
+import java.io.BufferedReader
 import java.util.concurrent.TimeUnit
+import kotlin.math.min
+import kotlin.math.pow
+import kotlin.random.Random
 
 private interface PingService {
     @GET("/")
@@ -87,7 +98,7 @@ object ServiceBuilder {
 }
 
 
-private const val TAG = "net request"
+const val ServiceBuilderTag = "net request"
 
 private fun <T> Call<T>.getUrl(): String = request().url().toString()
 
@@ -106,6 +117,24 @@ private fun <T> Call<T>.getUrl(): String = request().url().toString()
 //    is Success -> onSuccess(data)
 //    is Error -> onError(code, msg)
 //}
+
+data class RetryConfig(
+    val maxAttempts: Int = 3,           // 最大重试次数
+    val initialDelayMs: Long = 1000,    // 初始延迟时间（毫秒）
+    val maxDelayMs: Long = 10000,       // 最大延迟时间（毫秒）
+    val factor: Double = 2.0,           // 指数退避因子
+    val jitter: Double = 0.1            // 抖动因子(0.0-1.0)
+) {
+    fun getDelayForAttempt(attempt: Int): Long {
+        // 计算指数退避时间
+        val exponentialDelay = (initialDelayMs * factor.pow(attempt - 1)).toLong()
+        val cappedDelay = min(exponentialDelay, maxDelayMs)
+
+        // 添加随机抖动
+        val jitterOffset = (cappedDelay * jitter * (Random.nextDouble() * 2 - 1)).toLong()
+        return (cappedDelay + jitterOffset).coerceAtLeast(0)
+    }
+}
 
 /**
  * 同步请求方法
@@ -137,6 +166,65 @@ fun <T> Call<T>.requestEnqueue(
 })
 
 var requestShowJson = false
+
+fun <T> Response<T>.getErrorBodyString() = errorBody()?.string() ?: ""
+
+inline fun <reified T> Response<ResponseBody>.requestStream(): Flow<StreamNetResult<T>> = flow {
+    try {
+        if (isSuccessful) {
+            val reader = body()?.byteStream()?.bufferedReader()
+            if (reader != null) {
+                handleStreamResponse(reader)
+            } else {
+                logE(ServiceBuilderTag, "byte stream reader is null")
+                emit(StreamNetResult.Error(code(), "byte stream reader is null"))
+            }
+        } else {
+            val errorString = getErrorBodyString()
+            logE(ServiceBuilderTag, errorString)
+            emit(StreamNetResult.Error(code(), errorString))
+        }
+    } catch (t: Throwable) {
+        val tString = t.toLogString()
+        logE(ServiceBuilderTag, tString)
+        emit(StreamNetResult.Error(null, tString))
+    }
+    logE(ServiceBuilderTag, "complete")
+    emit(StreamNetResult.Complete)
+}
+
+suspend inline fun <reified T> FlowCollector<StreamNetResult<T>>.handleStreamResponse(reader: BufferedReader) {
+    val gson = Gson()
+    while (true) {
+        val line = withContext(Dispatchers.IO) {
+            reader.readLine()
+        } ?: break
+
+        when {
+            line.isEmpty() || line.startsWith(":") -> continue
+
+            line.startsWith("data: ") -> {
+                val data = line.substring(6)
+                if (data == "[DONE]") {
+                    logE(ServiceBuilderTag, "data is \"[DONE]\"")
+                    break
+                }
+
+                try {
+                    val streamData = gson.fromJson(data, T::class.java)
+                    if (requestShowJson)
+                        logE(ServiceBuilderTag, streamData.toPrettyJson())
+                    emit(StreamNetResult.Data(streamData))
+                } catch (t: Throwable) {
+                    val tString = t.toLogString()
+                    logE(ServiceBuilderTag, tString)
+                    emit(StreamNetResult.Error(null, "gson parse error"))
+                }
+            }
+        }
+    }
+}
+
 
 /**
  * 挂起请求方法
@@ -179,17 +267,17 @@ private fun <T> Call<T>.handleOnResponse(
     val url = getUrl()
     when {
         isSuccessful -> {
-            logD(TAG, "[${code()}] request succeed:\n$url")
+            logD(ServiceBuilderTag, "[${code()}] request succeed:\n$url")
             if (requestShowJson)
-                logD(TAG, "body:\n${body().toPrettyJson()}")
+                logD(ServiceBuilderTag, "body:\n${body().toPrettyJson()}")
             callback(Success(body()))
         } // 成功
 
         else -> {
-            val errorBodyString = (errorBody()?.string() ?: "").toPrettyJson()
-            logE(TAG, "[${code()}] request failed at:\n$url")
+            val errorBodyString = getErrorBodyString()
+            logE(ServiceBuilderTag, "[${code()}] request failed at:\n$url")
             if (requestShowJson)
-                logE(TAG, "error body:\n${errorBodyString}")
+                logE(ServiceBuilderTag, "error body:\n${errorBodyString.toPrettyJson()}")
             val errorString = errorBodyString.ifBlank { message() ?: "Unknown error" }
             callback(Error(code(), errorString))
         } // 其他失败情况
@@ -203,7 +291,7 @@ private fun <T> Call<T>.handleOnFailure(
     if (throwable == null) return
     val url = getUrl()
     val throwableString = throwable.toLogString()
-    logE(TAG, "[] request failed at:\n$url")
-    logE(TAG, "\nthrowable:\n$throwableString")
+    logE(ServiceBuilderTag, "[] request failed at:\n$url")
+    logE(ServiceBuilderTag, "\nthrowable:\n$throwableString")
     callback(Error(null, throwableString))
 }

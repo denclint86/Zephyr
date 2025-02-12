@@ -9,6 +9,7 @@ import com.zephyr.base.appContext
 import com.zephyr.base.appPreferenceName
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
 
 /**
  * 获取 DataStore 实例
@@ -23,6 +24,8 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
 val dataStoreInstance: DataStore<Preferences> by lazy {
     appContext.dataStore
 }
+
+fun <T> Preferences.Key<T>.putValueBlocking(value: T) = runBlocking { putValue(value) }
 
 /**
  * 插入泛型值元素到 DataStore 中
@@ -41,10 +44,12 @@ suspend fun <T> putPreference(
     value: T
 ) = preferencesKey.putValue(value)
 
+fun <T> Preferences.Key<T>.getValueBlocking(value: T) = runBlocking { getValue(value) }
+
 /**
  * 获取 DataStore 对应的泛型值
  */
-suspend fun <T> Preferences.Key<T>.getValue(default: T? = null): T? {
+suspend fun <T> Preferences.Key<T>.getValue(default: T): T {
     return dataStoreInstance.data.map {
         it[this] ?: default
     }.first()
@@ -55,5 +60,5 @@ suspend fun <T> Preferences.Key<T>.getValue(default: T? = null): T? {
  */
 suspend fun <T> getPreference(
     preferencesKey: Preferences.Key<T>,
-    default: T? = null
-): T? = preferencesKey.getValue(default)
+    default: T
+): T = preferencesKey.getValue(default)

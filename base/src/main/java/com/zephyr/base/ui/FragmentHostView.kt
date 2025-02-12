@@ -14,7 +14,7 @@ import kotlin.collections.set
  * 如果你苦于 navController 的重走生命周期问题,
  * 但又不想自己写子类可以用这个
  */
-class FragmentHostView @JvmOverloads constructor(
+open class FragmentHostView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
