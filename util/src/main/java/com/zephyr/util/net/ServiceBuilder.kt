@@ -206,40 +206,41 @@ inline fun <reified T> Response<ResponseBody>.requestStream(): Flow<StreamNetRes
     emit(StreamNetResult.Complete(false))
 }
 
-suspend inline fun <reified T> FlowCollector<StreamNetResult<T>>.handleStreamResponse(reader: BufferedReader) =
-    withContext(Dispatchers.IO) {
-        val gson = Gson()
-        var isSuccess = false
-        while (true) {
-            val line = reader.readLine() ?: break
+suspend inline fun <reified T> FlowCollector<StreamNetResult<T>>.handleStreamResponse(reader: BufferedReader) {
+    val gson = Gson()
+    var isSuccess = false
+    while (true) {
+        val line = withContext(Dispatchers.IO) {
+            reader.readLine()
+        } ?: break
 
-            when {
-                line.isEmpty() || line.startsWith(":") -> continue
+        when {
+            line.isEmpty() || line.startsWith(":") -> continue
 
-                line.startsWith("data: ") -> {
-                    val data = line.substring(6)
-                    if (data == "[DONE]") {
-                        logE(ServiceBuilderTag, "data is \"[DONE]\"")
-                        isSuccess = true
-                        break
-                    }
+            line.startsWith("data: ") -> {
+                val data = line.substring(6)
+                if (data == "[DONE]") {
+                    logE(ServiceBuilderTag, "data is \"[DONE]\"")
+                    isSuccess = true
+                    break
+                }
 
-                    try {
-                        val streamData = gson.fromJson(data, T::class.java)
-                        if (requestShowJson)
-                            logE(ServiceBuilderTag, streamData.toPrettyJson())
-                        emit(StreamNetResult.Data(streamData))
-                    } catch (t: Throwable) {
-                        val tString = t.toLogString()
-                        logE(ServiceBuilderTag, tString)
-                        emit(StreamNetResult.Error(null, "gson parse error"))
-                    }
+                try {
+                    val streamData = gson.fromJson(data, T::class.java)
+                    if (requestShowJson)
+                        logE(ServiceBuilderTag, streamData.toPrettyJson())
+                    emit(StreamNetResult.Data(streamData))
+                } catch (t: Throwable) {
+                    val tString = t.toLogString()
+                    logE(ServiceBuilderTag, tString)
+                    emit(StreamNetResult.Error(null, "gson parse error"))
                 }
             }
         }
-        reader.close()
-        emit(StreamNetResult.Complete(isSuccess))
     }
+    reader.close()
+    emit(StreamNetResult.Complete(isSuccess))
+}
 
 
 /**
