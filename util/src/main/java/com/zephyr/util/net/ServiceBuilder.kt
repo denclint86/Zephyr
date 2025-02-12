@@ -9,6 +9,8 @@ import com.zephyr.util.net.NetResult.Error
 import com.zephyr.util.net.NetResult.Success
 import com.zephyr.util.toPrettyJson
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
@@ -169,15 +171,26 @@ var requestShowJson = false
 
 fun <T> Response<T>.getErrorBodyString() = errorBody()?.string() ?: ""
 
+/**
+ * 流式请求 flow
+ *
+ * 发送四种状态:
+ * Start
+ * Data: data: T?
+ * Error: code: Int?, msg: String
+ * Complete: reason: String?
+ */
 inline fun <reified T> Response<ResponseBody>.requestStream(): Flow<StreamNetResult<T>> = flow {
+    emit(StreamNetResult.Start)
     try {
         if (isSuccessful) {
             val reader = body()?.byteStream()?.bufferedReader()
             if (reader != null) {
                 handleStreamResponse(reader)
+                return@flow
             } else {
                 logE(ServiceBuilderTag, "byte stream reader is null")
-                emit(StreamNetResult.Error(code(), "byte stream reader is null"))
+                emit(StreamNetResult.Error(null, "byte stream reader is null"))
             }
         } else {
             val errorString = getErrorBodyString()
@@ -189,41 +202,44 @@ inline fun <reified T> Response<ResponseBody>.requestStream(): Flow<StreamNetRes
         logE(ServiceBuilderTag, tString)
         emit(StreamNetResult.Error(null, tString))
     }
-    logE(ServiceBuilderTag, "complete")
-    emit(StreamNetResult.Complete)
+    currentCoroutineContext().ensureActive()
+    emit(StreamNetResult.Complete(false))
 }
 
-suspend inline fun <reified T> FlowCollector<StreamNetResult<T>>.handleStreamResponse(reader: BufferedReader) {
-    val gson = Gson()
-    while (true) {
-        val line = withContext(Dispatchers.IO) {
-            reader.readLine()
-        } ?: break
+suspend inline fun <reified T> FlowCollector<StreamNetResult<T>>.handleStreamResponse(reader: BufferedReader) =
+    withContext(Dispatchers.IO) {
+        val gson = Gson()
+        var isSuccess = false
+        while (true) {
+            val line = reader.readLine() ?: break
 
-        when {
-            line.isEmpty() || line.startsWith(":") -> continue
+            when {
+                line.isEmpty() || line.startsWith(":") -> continue
 
-            line.startsWith("data: ") -> {
-                val data = line.substring(6)
-                if (data == "[DONE]") {
-                    logE(ServiceBuilderTag, "data is \"[DONE]\"")
-                    break
-                }
+                line.startsWith("data: ") -> {
+                    val data = line.substring(6)
+                    if (data == "[DONE]") {
+                        logE(ServiceBuilderTag, "data is \"[DONE]\"")
+                        isSuccess = true
+                        break
+                    }
 
-                try {
-                    val streamData = gson.fromJson(data, T::class.java)
-                    if (requestShowJson)
-                        logE(ServiceBuilderTag, streamData.toPrettyJson())
-                    emit(StreamNetResult.Data(streamData))
-                } catch (t: Throwable) {
-                    val tString = t.toLogString()
-                    logE(ServiceBuilderTag, tString)
-                    emit(StreamNetResult.Error(null, "gson parse error"))
+                    try {
+                        val streamData = gson.fromJson(data, T::class.java)
+                        if (requestShowJson)
+                            logE(ServiceBuilderTag, streamData.toPrettyJson())
+                        emit(StreamNetResult.Data(streamData))
+                    } catch (t: Throwable) {
+                        val tString = t.toLogString()
+                        logE(ServiceBuilderTag, tString)
+                        emit(StreamNetResult.Error(null, "gson parse error"))
+                    }
                 }
             }
         }
+        reader.close()
+        emit(StreamNetResult.Complete(isSuccess))
     }
-}
 
 
 /**

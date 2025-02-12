@@ -10,9 +10,3 @@ sealed class NetResult<out T> {
     class Success<out T>(val data: T?) : NetResult<T>()
     class Error(val code: Int?, val msg: String) : NetResult<Nothing>()
 }
-
-sealed class StreamNetResult<out T> {
-    class Data<out T>(val data: T?) : StreamNetResult<T>()
-    class Error(val code: Int?, val msg: String) : StreamNetResult<Nothing>()
-    data object Complete : StreamNetResult<Nothing>()
-}
