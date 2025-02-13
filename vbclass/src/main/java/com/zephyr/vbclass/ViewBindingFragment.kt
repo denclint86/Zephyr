@@ -7,8 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
-import com.zephyr.base.extension.TAG
-import com.zephyr.base.log.logI
+import com.zephyr.global_values.TAG
+import com.zephyr.log.logI
 
 /**
  * @see ViewBindingInterface 注意事项

@@ -40,7 +40,12 @@ android {
 }
 
 dependencies {
-    implementation(project(":base"))
+    implementation(project(":datastore"))
+    implementation(project(":extension"))
+    implementation(project(":global-values"))
+    implementation(project(":log"))
+    implementation(project(":net"))
+    implementation(project(":scaling-layout"))
     implementation(project(":vbclass"))
 
     implementation(libs.material)

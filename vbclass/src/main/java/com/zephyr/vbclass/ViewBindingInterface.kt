@@ -5,11 +5,13 @@ package com.zephyr.vbclass
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.ViewDataBinding
-import com.zephyr.base.log.logE
+import com.zephyr.log.logE
 import java.lang.reflect.ParameterizedType
 
 /**
  * 功能 : 利用 java 反射获取 viewbinding 的类
+ *
+ * 请注意泛型擦除所带来的影响
  *
  * 已经用具体的 viewbinding 实现的类不能再被继承,
  * 否则会由于找不到 viewbinding 而崩溃,

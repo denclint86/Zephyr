@@ -2,20 +2,24 @@
 agp = "8.5.0"
 converterScalars = "2.9.0"
 kotlin = "1.9.0"
+kotlinxCoroutinesCore = "1.9.0"
 material = "1.12.0"
 glideVersion = "4.16.0"
 lifecycleViewmodelKtx = "2.8.7"
 retrofit = "2.11.0"
 datastoreCoreAndroid = "1.1.1"
+core = "1.13.0"
 
 [libraries]
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 converter-scalars = { module = "com.squareup.retrofit2:converter-scalars", version.ref = "converterScalars" }
 github-glide = { module = "com.github.bumptech.glide:glide", version.ref = "glideVersion" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 androidx-datastore = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastoreCoreAndroid" }
+androidx-core = { group = "androidx.core", name = "core", version.ref = "core" }
 
 [plugins]
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

@@ -34,7 +34,11 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Zephyr"
-include(":base")
+include(":extension")
 include(":vbclass")
-include(":util")
+include(":datastore")
+include(":net")
+include(":log")
+include(":global-values")
+include(":scaling-layout")
 include(":app")

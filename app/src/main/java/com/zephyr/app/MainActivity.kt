@@ -6,8 +6,8 @@ import android.os.VibratorManager
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import com.zephyr.app.databinding.ActivityMainBinding
-import com.zephyr.base.extension.toast
-import com.zephyr.base.extension.withPermission
+import com.zephyr.extension.activity.withPermission
+import com.zephyr.extension.widget.toast
 import com.zephyr.vbclass.ViewBindingActivity
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)

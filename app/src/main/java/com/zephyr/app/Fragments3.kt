@@ -1,7 +1,7 @@
 package com.zephyr.app
 
 import com.zephyr.app.databinding.FragmentDefaultBinding
-import com.zephyr.base.ui.findHost
+import com.zephyr.extension.ui.fragmenthost.findHost
 import com.zephyr.vbclass.ViewBindingFragment
 
 class Fragment3a : ViewBindingFragment<FragmentDefaultBinding>() {

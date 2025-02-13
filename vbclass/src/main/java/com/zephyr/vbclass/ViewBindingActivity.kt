@@ -3,8 +3,8 @@ package com.zephyr.vbclass
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.ViewDataBinding
-import com.zephyr.base.extension.TAG
-import com.zephyr.base.log.logI
+import com.zephyr.global_values.TAG
+import com.zephyr.log.logI
 
 /**
  * @see ViewBindingInterface 注意事项
