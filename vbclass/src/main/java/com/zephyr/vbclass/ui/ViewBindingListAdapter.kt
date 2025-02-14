@@ -20,13 +20,7 @@ abstract class ViewBindingListAdapter<VB : ViewDataBinding, D>(
 ) : ListAdapter<D, ViewBindingListAdapter<VB, D>.ViewHolder>(itemCallback),
     ViewBindingInterface<VB> {
 
-    protected lateinit var binding: VB
-
-    inner class ViewHolder(val binding: VB) : RecyclerView.ViewHolder(binding.root) {
-        init {
-            this@ViewBindingListAdapter.binding = binding
-        }
-    }
+    inner class ViewHolder(val binding: VB) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return with(getViewBinding(LayoutInflater.from(parent.context), parent)) {
