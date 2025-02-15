@@ -9,11 +9,12 @@ import com.zephyr.net.bean.NetResult.Error
 import com.zephyr.net.bean.NetResult.Success
 import com.zephyr.net.bean.StreamNetResult
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -38,40 +39,44 @@ fun <T> Response<T>.getErrorBodyString() = errorBody()?.string() ?: ""
  * Start
  * Data: data: T?
  * Error: code: Int?, msg: String
- * Complete: reason: String?
+ * Complete: isSuccess: Boolean
  */
 inline fun <reified T> Response<ResponseBody>.requestStream(): Flow<StreamNetResult<T>> = flow {
-    emit(StreamNetResult.Start)
+    safeEmit(StreamNetResult.Start)
     try {
         if (isSuccessful) {
             val reader = body()?.byteStream()?.bufferedReader()
             if (reader != null) {
-                handleStreamResponse(reader)
+                reader.use {
+                    handleStreamResponse(it)
+                }
                 return@flow
             } else {
                 logE(ServiceBuilderTag, "byte stream reader is null")
-                emit(StreamNetResult.Error(null, "byte stream reader is null"))
+                safeEmit(StreamNetResult.Error(null, "byte stream reader is null"))
             }
         } else {
             val errorString = getErrorBodyString()
             logE(ServiceBuilderTag, errorString)
-            emit(StreamNetResult.Error(code(), errorString))
+            safeEmit(StreamNetResult.Error(code(), errorString))
         }
     } catch (t: Throwable) {
         val tString = t.toLogString()
         logE(ServiceBuilderTag, tString)
-        emit(StreamNetResult.Error(null, tString))
+        safeEmit(StreamNetResult.Error(null, tString))
     }
-    currentCoroutineContext().ensureActive()
-    emit(StreamNetResult.Complete(false))
+    safeEmit(StreamNetResult.Complete(false))
 }
 
 suspend inline fun <reified T> FlowCollector<StreamNetResult<T>>.handleStreamResponse(reader: BufferedReader) {
     val gson = Gson()
     var isSuccess = false
     while (true) {
-        val line = withContext(Dispatchers.IO) {
+        val line = try {
             reader.readLine()
+        } catch (t: Throwable) {
+            t.logE(ServiceBuilderTag)
+            null
         } ?: break
 
         when {
@@ -89,19 +94,22 @@ suspend inline fun <reified T> FlowCollector<StreamNetResult<T>>.handleStreamRes
                     val streamData = gson.fromJson(data, T::class.java)
                     if (requestShowJson)
                         logE(ServiceBuilderTag, streamData.toPrettyJson())
-                    emit(StreamNetResult.Data(streamData))
+                    safeEmit(StreamNetResult.Data(streamData))
                 } catch (t: Throwable) {
                     val tString = t.toLogString()
                     logE(ServiceBuilderTag, tString)
-                    emit(StreamNetResult.Error(null, "gson parse error"))
+                    safeEmit(StreamNetResult.Error(null, "gson parse error"))
                 }
             }
         }
     }
-    withContext(Dispatchers.IO) {
-        reader.close()
-    }
-    emit(StreamNetResult.Complete(isSuccess))
+    safeEmit(StreamNetResult.Complete(isSuccess))
+    currentCoroutineContext().cancel()
+}
+
+suspend fun <T> FlowCollector<T>.safeEmit(t: T) = runCatching {
+    if (currentCoroutineContext().isActive)
+        emit(t)
 }
 
 /**
