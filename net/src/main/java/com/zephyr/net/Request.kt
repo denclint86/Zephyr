@@ -9,12 +9,9 @@ import com.zephyr.net.bean.NetResult.Error
 import com.zephyr.net.bean.NetResult.Success
 import com.zephyr.net.bean.StreamNetResult
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -42,42 +39,58 @@ fun <T> Response<T>.getErrorBodyString() = errorBody()?.string() ?: ""
  * Complete: isSuccess: Boolean
  */
 inline fun <reified T> Response<ResponseBody>.requestStream(): Flow<StreamNetResult<T>> = flow {
-    safeEmit(StreamNetResult.Start)
+    tryEmit(StreamNetResult.Start)
+    var isSuccess = false
+    var errorSent = false
     try {
         if (isSuccessful) {
             val reader = body()?.byteStream()?.bufferedReader()
             if (reader != null) {
-                reader.use {
-                    handleStreamResponse(it)
+                isSuccess = handleStreamResponse(reader)
+                withContext(Dispatchers.IO) {
+                    try {
+                        reader.close()
+                    } catch (t: Throwable) {
+                        t.logE(ServiceBuilderTag)
+                    }
                 }
-                return@flow
             } else {
                 logE(ServiceBuilderTag, "byte stream reader is null")
-                safeEmit(StreamNetResult.Error(null, "byte stream reader is null"))
+                tryEmit(StreamNetResult.Error(null, "byte stream reader is null"))
+                errorSent = true
             }
         } else {
             val errorString = getErrorBodyString()
             logE(ServiceBuilderTag, errorString)
-            safeEmit(StreamNetResult.Error(code(), errorString))
+            tryEmit(StreamNetResult.Error(code(), errorString))
+            errorSent = true
         }
     } catch (t: Throwable) {
         val tString = t.toLogString()
         logE(ServiceBuilderTag, tString)
-        safeEmit(StreamNetResult.Error(null, tString))
+        tryEmit(StreamNetResult.Error(null, tString))
+        errorSent = true
     }
-    safeEmit(StreamNetResult.Complete(false))
+    runCatching {
+        if (!isSuccess && !errorSent)
+            tryEmit(StreamNetResult.Error(null, "unknown error"))
+        tryEmit(StreamNetResult.Complete(isSuccess))
+    }
 }
 
-suspend inline fun <reified T> FlowCollector<StreamNetResult<T>>.handleStreamResponse(reader: BufferedReader) {
+suspend inline fun <reified T> FlowCollector<StreamNetResult<T>>.handleStreamResponse(reader: BufferedReader): Boolean {
     val gson = Gson()
     var isSuccess = false
     while (true) {
-        val line = try {
-            reader.readLine()
-        } catch (t: Throwable) {
-            t.logE(ServiceBuilderTag)
-            null
-        } ?: break
+        val line =
+            withContext(Dispatchers.IO) {
+                try {
+                    reader.readLine()
+                } catch (t: Throwable) {
+                    t.logE(ServiceBuilderTag)
+                    null
+                }
+            } ?: break
 
         when {
             line.isEmpty() || line.startsWith(":") -> continue
@@ -94,22 +107,22 @@ suspend inline fun <reified T> FlowCollector<StreamNetResult<T>>.handleStreamRes
                     val streamData = gson.fromJson(data, T::class.java)
                     if (requestShowJson)
                         logE(ServiceBuilderTag, streamData.toPrettyJson())
-                    safeEmit(StreamNetResult.Data(streamData))
+                    tryEmit(StreamNetResult.Data(streamData))
                 } catch (t: Throwable) {
-                    val tString = t.toLogString()
-                    logE(ServiceBuilderTag, tString)
-                    safeEmit(StreamNetResult.Error(null, "gson parse error"))
+                    t.logE(ServiceBuilderTag)
+                    tryEmit(StreamNetResult.Error(null, "gson parse error"))
                 }
             }
         }
     }
-    safeEmit(StreamNetResult.Complete(isSuccess))
-    currentCoroutineContext().cancel()
+    return isSuccess
 }
 
-suspend fun <T> FlowCollector<T>.safeEmit(t: T) = runCatching {
-    if (currentCoroutineContext().isActive)
-        emit(t)
+suspend inline fun <reified T> FlowCollector<T>.tryEmit(t: T) = try {
+    emit(t)
+    logE(ServiceBuilderTag, "emit: ${t!!::class.simpleName}")
+} catch (t: Throwable) {
+    t.logE(ServiceBuilderTag)
 }
 
 /**
