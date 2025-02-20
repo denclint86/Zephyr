@@ -17,7 +17,6 @@ class ScalingLayoutOutlineProvider(
 ) : ViewOutlineProvider() {
     override fun getOutline(view: View, outline: Outline) {
         outline.setRoundRect(0, 0, width, height, radius)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) view.clipToOutline =
-            true // 关键修改: 解决安卓 9 以上圆角失效的问题
+        view.clipToOutline = true // 关键修改: 解决安卓 9 以上圆角失效的问题
     }
 }
