@@ -22,11 +22,8 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>() {
             (if (it) "已授权" else "未授权").toast()
         }
 
-        vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        vibrator =
             (getSystemService(VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
-        } else {
-            getSystemService(VIBRATOR_SERVICE) as Vibrator
-        }
 
         nav.setOnItemSelectedListener { item ->
             vibrator.vibrate(50L)

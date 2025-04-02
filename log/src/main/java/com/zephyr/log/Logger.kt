@@ -35,6 +35,7 @@ open class LoggerClass {
     protected lateinit var file: File
 
     protected var isCrashed = false
+    protected var write = false
 
     // 当前时间的格式
     protected var accurateTimeFormat = SimpleDateFormat(TIME_FORMAT, Locale.getDefault())
@@ -77,9 +78,11 @@ open class LoggerClass {
      */
     fun startLogger(
         context: Application,
-        logLevel: LogLevel
+        logLevel: LogLevel,
+        write: Boolean = false
     ) = runCatching {
         globalContext = context
+        this.write = write
         setLogLevel(logLevel)
     }.onFailure {
         globalContext = context
@@ -101,11 +104,11 @@ open class LoggerClass {
      */
     protected fun init() {
         create()
-        startLogCoroutine()
+        if (write)
+            startLogCoroutine()
         registerHandler()
         cleanOldLogs()
     }
-
 
     protected fun create() {
         fileDir = File(globalContext!!.getExternalFilesDir(null), FILE_PATH)
@@ -133,6 +136,7 @@ open class LoggerClass {
     }
 
     protected fun writeToFile() {
+        if (!write) return
         try {
             val file = getLogFile()
             FileWriter(file, true).use { writer ->
@@ -145,6 +149,7 @@ open class LoggerClass {
     }
 
     fun appendLog(level: LogLevel, tag: String, message: String) {
+        if (!write) return
         val currentTime = accurateTimeFormat.format(Date())
         val logMessage = "$currentTime ${level.text} $tag\n$message\n"
         logBuffer.append(logMessage)

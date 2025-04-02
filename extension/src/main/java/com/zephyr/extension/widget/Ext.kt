@@ -12,16 +12,35 @@ import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.zephyr.extension.thread.runOnMain
 import com.zephyr.global_values.globalContext
+import com.zephyr.log.logE
 
-fun toast(msg: String, cancelLast: Boolean = true, length: Int = Toast.LENGTH_SHORT) = runOnMain {
-    if (cancelLast)
-        Toast(globalContext).cancel()
-    Toast.makeText(globalContext, msg, length).show()
+fun toast(
+    context: Context?,
+    msg: String,
+    cancelLast: Boolean = true,
+    length: Int = Toast.LENGTH_SHORT
+) {
+    try {
+        if (context == null) return
+        runOnMain {
+            if (cancelLast)
+                Toast(context).cancel()
+            Toast.makeText(context, msg, length).show()
+        }
+    } catch (t: Throwable) {
+        t.logE()
+    }
 }
 
-fun Any?.toast(cancelLast: Boolean = true) {
+fun toast(msg: String, cancelLast: Boolean = true, length: Int = Toast.LENGTH_SHORT) =
+    toast(globalContext, msg, cancelLast, length)
+
+fun Any?.toast(cancelLast: Boolean = true, length: Int = Toast.LENGTH_SHORT) =
+    toast(globalContext, cancelLast, length)
+
+fun Any?.toast(context: Context?, cancelLast: Boolean = true, length: Int = Toast.LENGTH_SHORT) {
     val str = this.toString()
-    toast(str, cancelLast)
+    toast(context, str, cancelLast, length)
 }
 
 fun View.setSize(size: Int) = setSize(size, size)
@@ -31,11 +50,11 @@ fun View.setSize(width: Int? = null, height: Int? = null) = updateLayoutParams {
     height?.let { this.height = it }
 }
 
-fun View.setMargins_H(margin: Int) {
+fun View.setHorizontalMargins(margin: Int) {
     setMargins(start = margin, end = margin)
 }
 
-fun View.setMargins_V(margin: Int) {
+fun View.setVerticalMargins(margin: Int) {
     setMargins(top = margin, bottom = margin)
 }
 
@@ -87,7 +106,7 @@ fun RecyclerView.removeOnLoadMoreListener(listener: RecyclerView.OnScrollListene
 /**
  * @param orientation 指定的方向
  */
-fun RecyclerView.addOnLoadMoreListener_V(
+fun RecyclerView.addOnVerticalLoadMoreListener(
     orientation: VerticalCannotScroll,
     onLoad: () -> Unit
 ): RecyclerView.OnScrollListener {
@@ -106,7 +125,7 @@ fun RecyclerView.addOnLoadMoreListener_V(
 /**
  * @param orientation 指定的方向
  */
-fun RecyclerView.addOnLoadMoreListener_H(
+fun RecyclerView.addOnHorizontalLoadMoreListener(
     orientation: HorizontalCannotScroll,
     onLoad: () -> Unit
 ): RecyclerView.OnScrollListener {
