@@ -69,6 +69,8 @@ interface ViewBindingInterface<VB : ViewDataBinding> {
 
     /**
      * 从 vbClass 中找到目标类并返回
+     *
+     * 并不完全可靠, 不过在大部分情况下都能正确找到
      */
     private fun List<Class<VB>>.getViewBindingClass(): Class<VB> {
         // 找到包含 "binding" 的索引

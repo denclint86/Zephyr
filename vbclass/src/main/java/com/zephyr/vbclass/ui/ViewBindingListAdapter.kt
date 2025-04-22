@@ -33,7 +33,7 @@ abstract class ViewBindingListAdapter<VB : ViewDataBinding, D>(
      *
      * 不再需要写 "executePendingBindings()"
      */
-    abstract fun VB.onBindViewHolder(data: D?, position: Int)
+    abstract fun VB.bind(data: D?, position: Int)
 
     /**
      * 不需要再重写
@@ -45,7 +45,7 @@ abstract class ViewBindingListAdapter<VB : ViewDataBinding, D>(
             } catch (_: Exception) {
                 null
             }
-            onBindViewHolder(item, position)
+            bind(item, position)
             executePendingBindings()
         }
     }

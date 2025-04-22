@@ -48,5 +48,6 @@ dependencies {
     implementation(project(":scaling-layout"))
     implementation(project(":vbclass"))
 
+//    implementation("androidx.compose.runtime:runtime:1.7.8") // 改成自己的那些
     implementation(libs.material)
 }
