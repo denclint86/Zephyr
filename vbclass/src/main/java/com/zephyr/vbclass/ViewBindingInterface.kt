@@ -23,30 +23,27 @@ interface ViewBindingInterface<VB : ViewDataBinding> {
         container: ViewGroup?,
         attachToRoot: Boolean = false
     ): VB {
-        with(getTypeList()) {
-            val inflateMethod = this.getViewBindingClass().getDeclaredMethod(
-                "inflate",
-                LayoutInflater::class.java,
-                ViewGroup::class.java,
-                Boolean::class.java
-            )
-            val dataBinding =
-                inflateMethod.invoke(null, inflater, container, attachToRoot) as VB
-            return dataBinding
-        }
+        val inflateMethod = getViewBindingClass().getDeclaredMethod(
+            "inflate",
+            LayoutInflater::class.java,
+            ViewGroup::class.java,
+            Boolean::class.java
+        )
+        val dataBinding =
+            inflateMethod.invoke(null, inflater, container, attachToRoot) as VB
+        return dataBinding
     }
 
     fun getViewBinding(inflater: LayoutInflater): VB {
-        with(getTypeList()) {
-            val inflateMethod =
-                this.getViewBindingClass().getDeclaredMethod(
-                    "inflate",
-                    LayoutInflater::class.java
-                )
-            val dataBinding = inflateMethod.invoke(null, inflater) as VB
-            return dataBinding
-        }
+        val inflateMethod = getViewBindingClass().getDeclaredMethod(
+            "inflate",
+            LayoutInflater::class.java
+        )
+        val dataBinding = inflateMethod.invoke(null, inflater) as VB
+        return dataBinding
     }
+
+    fun getViewBindingClass(): Class<VB> = getTypeList().getViewBindingClass()
 
     /**
      * 从 this.javaClass 中获取 vb 信息(即在最终的实现中),
