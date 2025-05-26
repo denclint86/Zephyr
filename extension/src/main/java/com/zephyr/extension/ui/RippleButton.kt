@@ -10,7 +10,7 @@ import android.graphics.drawable.shapes.OvalShape
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatImageButton
 
-open class RippleButton @JvmOverloads constructor(
+internal open class RippleButton @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0

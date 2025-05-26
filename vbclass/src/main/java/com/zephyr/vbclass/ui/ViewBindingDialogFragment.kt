@@ -24,7 +24,7 @@ abstract class ViewBindingDialogFragment<VB : ViewDataBinding>(
     protected val binding: VB
         get() = _binding!!
 
-    abstract fun VB.initBinding()
+    abstract fun VB.onViewCreated()
 
     @SuppressLint("PrivateResource")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -47,7 +47,7 @@ abstract class ViewBindingDialogFragment<VB : ViewDataBinding>(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.initBinding()
+        binding.onViewCreated()
     }
 
     override fun onStart() {

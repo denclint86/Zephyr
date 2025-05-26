@@ -45,5 +45,4 @@ afterEvaluate {
 
 dependencies {
     implementation(libs.material)
-    implementation(project(":log"))
 }

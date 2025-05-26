@@ -14,6 +14,7 @@ const val SECOND = 1000L
 
 // 日志等级
 var LOG_LEVEL = LogLevel.DO_NOT_LOG
+var WRITE_LOG = false
 
 // 是否启用自动删除
 var CLEAN_OLD = true
@@ -36,14 +37,16 @@ var TIME_FORMAT = "MM/dd HH:mm:ss"
 /**
  * 功能: 定时录入日志到本地, 在崩溃时展示崩溃原因
  */
-object Logger : LoggerClass()
+val Logger by lazy {
+    LoggerImpl(LOG_LEVEL, WRITE_LOG)
+}
 
 fun logV(tag: String = "", msg: String = "") =
     with(LogLevel.VERBOSE) {
         if (LOG_LEVEL.v <= this.v) {
             val str = LOG_HEADER + msg
             Log.v(tag, str)
-            Logger.appendLog(this, tag, str)
+            Logger.appendLogToBuffer(this, tag, str)
         }
     }
 
@@ -52,7 +55,7 @@ fun logD(tag: String = "", msg: String = "") =
         if (LOG_LEVEL.v <= this.v) {
             val str = LOG_HEADER + msg
             Log.d(tag, str)
-            Logger.appendLog(this, tag, str)
+            Logger.appendLogToBuffer(this, tag, str)
         }
     }
 
@@ -61,7 +64,7 @@ fun logI(tag: String = "", msg: String = "") =
         if (LOG_LEVEL.v <= this.v) {
             val str = LOG_HEADER + msg
             Log.i(tag, str)
-            Logger.appendLog(this, tag, str)
+            Logger.appendLogToBuffer(this, tag, str)
         }
     }
 
@@ -70,7 +73,7 @@ fun logW(tag: String = "", msg: String = "") =
         if (LOG_LEVEL.v <= this.v) {
             val str = LOG_HEADER + msg
             Log.w(tag, str)
-            Logger.appendLog(this, tag, str)
+            Logger.appendLogToBuffer(this, tag, str)
         }
     }
 
@@ -79,6 +82,6 @@ fun logE(tag: String = "", msg: String = "") =
         if (LOG_LEVEL.v <= this.v) {
             val str = LOG_HEADER + msg
             Log.e(tag, str)
-            Logger.appendLog(this, tag, str)
+            Logger.appendLogToBuffer(this, tag, str)
         }
     }

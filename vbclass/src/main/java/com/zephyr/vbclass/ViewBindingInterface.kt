@@ -2,11 +2,16 @@
 
 package com.zephyr.vbclass
 
+import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.ViewDataBinding
-import com.zephyr.log.logE
+import androidx.viewbinding.ViewBinding
 import java.lang.reflect.ParameterizedType
+
+val ViewBinding.context: Context
+    get() = root.context
 
 /**
  * 功能 : 利用 java 反射获取 viewbinding 的类
@@ -56,7 +61,7 @@ interface ViewBindingInterface<VB : ViewDataBinding> {
             val arguments = parameterizedType.actualTypeArguments
             return arguments.filterIsInstance<Class<VB>>()
         } catch (e: Exception) {
-            logE(
+            Log.e(
                 this::class.simpleName.toString(),
                 e.message.toString() + "\n" + e.stackTrace.toString()
             )
@@ -72,7 +77,11 @@ interface ViewBindingInterface<VB : ViewDataBinding> {
     private fun List<Class<VB>>.getViewBindingClass(): Class<VB> {
         // 找到包含 "binding" 的索引
         val position =
-            indexOfFirst { it.simpleName.endsWith("Binding") }
+            indexOfFirst { clazz ->
+                // 判定一个类是否是我们要的 binding 的逻辑
+                clazz.simpleName.endsWith("Binding") &&
+                        (ViewDataBinding::class.java.isAssignableFrom(clazz))
+            }
 
         if (position == -1) {
             val builder = StringBuilder("在这个 list 中找不到名称包含 'Binding' 的项:")

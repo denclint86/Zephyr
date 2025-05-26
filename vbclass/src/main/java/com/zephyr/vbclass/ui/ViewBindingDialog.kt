@@ -18,13 +18,13 @@ open class ViewBindingDialog<VB : ViewDataBinding>(context: Context) : AlertDial
         getViewBinding(LayoutInflater.from(context))
     }
 
-    open fun VB.initBinding() {
+    open fun VB.onInitialized() {
     }
 
     init {
         window?.setBackgroundDrawableResource(android.R.color.transparent) // 隐藏原生的对话框
         setCancelable(false)
         setView(binding.root)
-        binding.initBinding()
+        binding.onInitialized()
     }
 }

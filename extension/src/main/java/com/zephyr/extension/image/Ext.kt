@@ -15,22 +15,6 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 
-fun Drawable?.copy(): Drawable? = this?.constantState?.newDrawable()?.mutate()
-
-fun getPlaceholderBitmap(radius: Int, color: String? = "#90909080"): Bitmap {
-    return getPlaceholderDrawable(radius, color, 1).toBitmap()
-}
-
-fun getPlaceholderDrawable(radius: Int, color: String? = "#90909080", size: Int? = null) =
-    GradientDrawable().apply {
-        shape = GradientDrawable.RECTANGLE
-        if (radius != 0)
-            cornerRadius = radius * 1.2F // 设置圆角半径
-        if (size != null)
-            setSize(size, size)
-        setColor(Color.parseColor(color)) // 设置颜色
-    }
-
 @SuppressLint("CheckResult")
 fun ImageView.loadRadiusImage(
     imgUrl: String,

@@ -33,18 +33,18 @@ android {
     }
 }
 
-afterEvaluate {
-    publishing {
-        publications {
-            create<MavenPublication>("maven_public") {
-                from(components["release"])
-            }
-        }
-    }
-}
+//afterEvaluate {
+//    publishing {
+//        publications {
+//            create<MavenPublication>("maven_public") {
+//                from(components["release"])
+//            }
+//        }
+//    }
+//}
 
 dependencies {
-    implementation(project(":global-values"))
+    implementation(project(":provider"))
     implementation(project(":log"))
     implementation(libs.github.glide)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)

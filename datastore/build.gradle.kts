@@ -44,6 +44,6 @@ afterEvaluate {
 }
 
 dependencies {
-    implementation(project(":global-values"))
+    implementation(project(":provider"))
     implementation(libs.androidx.datastore)
 }

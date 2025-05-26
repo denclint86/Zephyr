@@ -2,6 +2,7 @@ package com.zephyr.extension.mvi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -70,4 +72,20 @@ abstract class MVIViewModel<Intent, State, Effect> : ViewModel() {
      * channel 接收并处理 intent
      */
     protected abstract fun handleIntent(intent: Intent)
+
+    fun <T, R> MVIViewModel<*, T, *>.observeState(
+        scope: CoroutineScope,
+        filter: suspend (T) -> R,
+        action: suspend (R) -> Unit
+    ) {
+        observeState {
+            scope.launch {
+                map(filter).collect(action)
+            }
+        }
+    }
+
+    suspend fun <T> MVIViewModel<*, *, T>.collectFlow(action: suspend (T) -> Unit) {
+        uiEffectFlow.collect(action)
+    }
 }

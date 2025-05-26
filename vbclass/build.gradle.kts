@@ -46,7 +46,5 @@ afterEvaluate {
 }
 
 dependencies {
-    implementation(project(":log"))
-    implementation(project(":global-values"))
     implementation(libs.material)
 }
