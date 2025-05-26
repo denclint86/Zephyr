@@ -1,11 +1,10 @@
 plugins {
-    id("maven-publish")
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
 }
 
 android {
-    namespace = "com.zephyr.global_values"
+    namespace = "com.niki.provider"
     compileSdk = 34
 
     defaultConfig {
@@ -33,14 +32,5 @@ android {
     }
 }
 
-afterEvaluate {
-    publishing {
-        publications {
-            create<MavenPublication>("maven_public") {
-                from(components["release"])
-            }
-        }
-    }
+dependencies {
 }
-
-dependencies {}
