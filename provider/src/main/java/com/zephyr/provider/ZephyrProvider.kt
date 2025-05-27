@@ -6,7 +6,7 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.net.Uri
 
-class ZephyrProvider : ContentProvider() {
+internal class ZephyrProvider : ContentProvider() {
     override fun onCreate(): Boolean {
         val context = context ?: return false
 

@@ -3,7 +3,6 @@ package com.zephyr.net
 import com.google.gson.Gson
 import com.zephyr.log.logD
 import com.zephyr.log.logE
-import com.zephyr.log.toLogString
 import com.zephyr.net.bean.NetResult
 import com.zephyr.net.bean.NetResult.Error
 import com.zephyr.net.bean.NetResult.Success
@@ -66,7 +65,7 @@ inline fun <reified T> Response<ResponseBody>.requestStream(): Flow<StreamNetRes
             errorSent = true
         }
     } catch (t: Throwable) {
-        val tString = t.toLogString()
+        val tString = t.stackTraceToString()
         logE(ServiceBuilderTag, tString)
         tryEmit(StreamNetResult.Error(null, tString))
         errorSent = true
@@ -218,7 +217,7 @@ private fun <T> Call<T>.handleOnFailure(
 ) {
     if (throwable == null) return
     val url = getUrl()
-    val throwableString = throwable.toLogString()
+    val throwableString = throwable.stackTraceToString()
     logE(ServiceBuilderTag, "[] request failed at:\n$url")
     logE(ServiceBuilderTag, "\nthrowable:\n$throwableString")
     callback(Error(null, throwableString))

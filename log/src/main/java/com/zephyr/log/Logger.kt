@@ -1,198 +1,118 @@
 package com.zephyr.log
 
-import android.os.Handler
-import android.os.Looper
-import com.zephyr.provider.Zephyr
+import android.util.Log
+import com.zephyr.log.interfaces.IBufferCtrl
+import com.zephyr.log.interfaces.IExceptionHandler
+import com.zephyr.log.interfaces.IFileManager
+import com.zephyr.log.models.BufferCtrl
+import com.zephyr.log.models.ExceptionHandler
+import com.zephyr.log.models.FileManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileWriter
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
-enum class LogLevel(val v: Int, val text: String) {
-    VERBOSE(1, "Verbose"),
-    DEBUG(2, "Debug"),
-    INFO(3, "Information"),
-    WARN(4, "Warning"),
-    ERROR(5, "Error"),
-    DO_NOT_LOG(6, "Do_not_log")
-}
+/**
+ * 日志类, 对外暴露日志记录、异常捕捉监听设置
+ */
+class Logger {
 
-open class LoggerImpl(logLevel: LogLevel, private val writeLog: Boolean) {
-    private val tag = this::class.simpleName!!
+    /**
+     * 设置当捕捉到未被捕获的异常时的回调
+     */
+    fun setOnCaughtListener(l: ((thread: Thread, throwable: Throwable) -> Unit)?) {
+        exceptionListener = l
+    }
 
-    private lateinit var fileDir: File
-    private lateinit var file: File
+    fun log(level: LogLevel, tag: String = "", msg: String = "") {
+        if (LogConfig.logLevel > level) return
+        if (LogConfig.logLevel != LogLevel.DO_NOT_LOG)
+            init()
 
-    private var isCrashed = false
+        when (level) {
+            LogLevel.VERBOSE -> Log.v(tag, msg)
+            LogLevel.DEBUG -> Log.d(tag, msg)
+            LogLevel.INFO -> Log.i(tag, msg)
+            LogLevel.WARN -> Log.w(tag, msg)
+            LogLevel.ERROR -> Log.e(tag, msg)
+            LogLevel.DO_NOT_LOG -> return
+        }
 
-    // 当前时间的格式
-    private var accurateTimeFormat = SimpleDateFormat(TIME_FORMAT, Locale.getDefault())
+        if (LogConfig.writeToFile)
+            addToBuffer(level, tag, msg)
+    }
 
-    // 日期的格式
-    private var dateFormat: String =
-        SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date())
 
-    // 文件命名格式
-    var fileName = FILE_HEADER + dateFormat + FILE_TYPE
+    private val buffer: IBufferCtrl by lazy {
+        BufferCtrl()
+    }
 
-    private val logBuffer = StringBuffer()
+    private val fileManager: IFileManager by lazy {
+        val fileIConfig = object : IFileManager.IConfig {
+            override val filePath: String
+                get() = LogConfig.fileFolder
+            override val fileName: String
+                get() = LogConfig.fileName
+            override val cleanOODLogs: Boolean
+                get() = LogConfig.cleanOODLogs
+            override val logKeepDuration: Long
+                get() = LogConfig.logKeepDuration
+        }
+
+        FileManager(fileIConfig)
+    }
+
+    private val exceptionHandler: IExceptionHandler by lazy {
+        ExceptionHandler()
+    }
 
     private val loggerScope =
         CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var loggerJob: Job? = null
 
-    private val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
+    private var exceptionListener: ((Thread, Throwable) -> Unit)? = null
 
-    // 出现未被捕获的错误时的处理方式
-    open val loggerCrashHandler: ((Thread, Throwable) -> Unit) = { thread, throwable ->
-        isCrashed = true
+    private var isInitialized = false
+    private var lock = Any()
 
-        val title = thread.name
-        val detail = throwable.toLogString()
-        val fullMsg = "at:\n${title}\ndetails:\n$detail"
+    private fun init() = synchronized(lock) {
+        if (isInitialized) return
+        launchWriteLogCoroutine()
 
-//        Log.e(tag, fullMsg)
-        appendLogToBuffer(LogLevel.ERROR, "UncaughtException", fullMsg)
-        writeCachedLogToFile()
-
-        /**
-         * 交给默认的 handler 接管
-         */
-        defaultHandler?.uncaughtException(thread, throwable)
-    }
-
-    init {
-        adjustLogLevel(logLevel)
-    }
-
-    private fun adjustLogLevel(level: LogLevel) =
-        when (level) {
-            in LogLevel.VERBOSE..LogLevel.ERROR -> {
-                start()
+        exceptionHandler.register()
+        exceptionHandler.setOnCaughtListener { thread, throwable ->
+            if (LogConfig.writeToFile) {
+                val fullMsg = "EXCEPTION: ${thread.name}\n${throwable.stackTraceToString()}"
+                addToBuffer(LogLevel.ERROR, "未捕捉的异常", fullMsg)
+                fileManager.append(buffer.pop())
             }
-
-            LogLevel.DO_NOT_LOG -> {}
-            else -> throw Exception("log level should between VERBOSE and DO_NOT_LOG")
+            exceptionListener?.invoke(thread, throwable)
+            (exceptionListener != null) // 如果注册了监听则认为已经处理异常, 返回真
         }
-
-    private fun start() {
-        initFileParams()
-        if (writeLog)
-            launchWriteLogCoroutine()
-        registerHandler()
-        cleanOldLogs()
-    }
-
-    private fun initFileParams() {
-        fileDir = File(Zephyr.application.getExternalFilesDir(null), FILE_PATH)
-        if (!fileDir.exists()) {
-            fileDir.mkdirs()
-        }
-        fileName = FILE_HEADER + dateFormat + FILE_TYPE
-        file = File(fileDir, fileName)
+        isInitialized = true
     }
 
     private fun launchWriteLogCoroutine() {
         loggerJob?.cancel()
         loggerJob = loggerScope.launch {
             while (isActive) {
-                delay(AUTO_WRITE_TIME_INTERVAL)
-                writeCachedLogToFile()
-            }
-        }
-    }
-
-    fun stop() {
-        loggerJob?.cancel()
-        loggerScope.cancel()
-    }
-
-    private fun writeCachedLogToFile() {
-        if (!writeLog) return
-        runCatching {
-            val file = getLogFile()
-            FileWriter(file, true).use { writer ->
-                writer.append(logBuffer.toString())
-                logBuffer.setLength(0)
-            }
-        }
-    }
-
-    fun appendLogToBuffer(level: LogLevel, tag: String, message: String) {
-        if (!writeLog) return
-        val currentTime = accurateTimeFormat.format(Date())
-        val logMessage = "$currentTime ${level.text} $tag\n$message\n"
-        logBuffer.append(logMessage)
-    }
-
-    private fun getLogFile(): File {
-        val fileName =
-            FILE_HEADER + dateFormat + FILE_TYPE
-
-        /**
-         * 判断名字主要是为了保证日期一致
-         */
-        if (fileName != Logger.fileName) {
-            initFileParams()
-            cleanOldLogs() // 日期变动再次清除日志
-        }
-        return file
-    }
-
-    private fun registerHandler() {
-        /**
-         * 主线程捕获原理:
-         * 用 handler 给主线程的 looper 添加新的任务——进入一个不断 loop 的死循环,
-         * 此时原生的 loop 函数由于在内部嵌套了我们的循环,
-         * 相当于被我们的 loop 接管了,
-         * 而我们的 loop 被 try-catch 块包裹所以可以捕捉所有异常
-         *
-         * 关于 Lopper.loop()
-         * 此函数在内部会获取所在线程的 looper 而不是使用 Lopper
-         */
-        Handler(Looper.getMainLooper()).post {
-            while (!isCrashed) {
-                // 当捕捉并处理异常后不再阻塞原生的 loop,
-                // 以便启动崩溃详情 activity
-                try {
-                    Looper.loop()
-                } catch (t: Throwable) {
-                    loggerCrashHandler(Looper.getMainLooper().thread, t)
+                var sleep = LogConfig.sleepTime
+                if (LogConfig.writeToFile) {
+                    fileManager.append(buffer.pop())
+                    fileManager.cleanOld()
+                } else {
+                    sleep *= 5
                 }
-            }
-        }
-
-        Thread.setDefaultUncaughtExceptionHandler { t, e ->
-            if (!isCrashed)
-                loggerCrashHandler(t, e)
-        }
-    }
-
-    private fun cleanOldLogs() {
-        if (!CLEAN_OLD) {
-            logI(tag, "未启用日志清除")
-            return
-        }
-        val outOfDate =
-            System.currentTimeMillis() - formatTime()
-        fileDir.listFiles()?.forEach { file -> // 遍历路径的文件
-            if (file.lastModified() < outOfDate) {
-                logI(tag, "删除过期的备份文件: ${file.name}")
-                file.delete()
+                delay(sleep)
             }
         }
     }
 
-    private fun formatTime(): Long {
-        return (DAYS_RETAINED * 24 * 60 * 60 + HOURS_RETAINED * 60 * 60 + MINUTES_RETAINED * 60 + SECONDS_RETAINED) * SECOND
+    private fun addToBuffer(level: LogLevel, tag: String, msg: String) {
+        val logMessage = "${LogConfig.time} | ${level.text} | $tag\n$msg\n"
+        buffer.add(logMessage)
     }
 }
