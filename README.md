@@ -1,3 +1,33 @@
+# 快速开始
+
+## settings.gradle.kts
+
+```kotlin
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        ...
+        maven { url = uri("https://jitpack.io") } // 添加 jitpack 的 Maven
+    }
+}
+```
+
+## 模块 build.gradle.kts 依赖导入
+
+```kotlin
+dependencies {
+    // 按需导入
+    val version = "3.1.0" // 根据最新 release 来设置
+    implementation("com.github.niki914.Zephyr:datastore:$version")
+    implementation("com.github.niki914.Zephyr:log:$version")
+    implementation("com.github.niki914.Zephyr:net:$version")
+    implementation("com.github.niki914.Zephyr:scaling-layout:$version")
+    implementation("com.github.niki914.Zephyr:tools:$version")
+    implementation("com.github.niki914.Zephyr:vbclass:$version")
+}
+```
+
+# 模块介绍
 
 ## vbclass 模块
 
@@ -10,27 +40,18 @@ class MainActivity : ViewBindingActivity<ActivityMainBinding>() {
 }
 ```
 
-此模块有大量 UI 的封装, 包括但不限于 activity、fragment、recyclerview-adapter
+此模块有大量 UI 的 viewbinding 封装, 包括但不限于 activity、fragment、recyclerview-adapter
 
 ---
 
 ## log 模块
 
-日志模块支持动态配置日志级别、文件存储、任意线程的异常捕获以及日志清理策略, 适用于需要高效日志管理和调试的Android项目。通过Kotlin实现, 结合协程和DSL, 提供简洁的API和良好的扩展性
+日志模块支持动态配置日志参数、文件存储、任意线程的异常捕获以及日志清理策略
 
-### 功能特性
-
-- **动态日志配置**：通过DSL动态调整日志级别、文件存储路径、日志保留时间等配置
-- **文件存储**：支持将日志写入文件, 自动生成带时间戳的文件名, 并支持定期清理过期日志
-- **异常捕获**：自动捕获未处理异常并记录, 支持自定义异常处理回调
-- **协程支持**：使用Kotlin协程异步写入日志, 确保不阻塞主线程
-- **轻量级设计**：代码结构清晰, 依赖最小化, 适合中小型项目快速集成
-
-### 使用示例
-
-#### 配置日志
+### 配置日志
 
 ```kotlin
+// 类似 DSL 语法的设置
 LogConfig.edit {
     logLevel = LogLevel.DEBUG // 设置日志级别
     writeToFile = true // 开启文件存储
@@ -40,33 +61,22 @@ LogConfig.edit {
 }
 ```
 
-#### 记录日志
+### 记录日志
 
 ```kotlin
 logD("MainActivity", "Application started") // 记录调试日志
 logE("Network", "Failed to connect") // 记录错误日志
 ```
 
-#### 异常捕获
+### 异常捕获配置
+
+可以防止大部分的崩溃情况
 
 ```kotlin
 setOnCaughtListener { thread, throwable ->
     startExceptionActivity(throwable) // 自定义异常处理, 比如打开一个崩溃界面
 }
 ```
-
-### 模块结构
-
-- **LogConfig.kt**：日志配置类, 使用DSL提供灵活的配置方式
-- **Logger.kt**：核心日志类, 负责日志记录、文件写入和异常捕获
-- **LogLevel.kt**：日志级别枚举, 定义不同级别的日志类型
-- **Ext.kt**：扩展函数, 提供便捷的日志记录API和文件操作工具
-
-### 集成步骤
-
-1. 将模块代码复制到项目中, 或通过Gradle添加为子模块
-2. 在项目初始化时配置`LogConfig`, 如设置日志级别和存储路径
-3. 使用`logV`、`logD`等函数记录日志, 或通过`setOnCaughtListener`注册异常监听
 
 ---
 
@@ -100,3 +110,9 @@ setOnCaughtListener { thread, throwable ->
 ## scaling layout 模块
 
 为  (scaling-layout)[https://github.com/iammert/ScalingLayout]  在新版本安卓上进行适配
+
+---
+
+## datastore 模块
+
+对 jetpack datastore 的封装
