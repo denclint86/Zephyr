@@ -6,6 +6,9 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.net.Uri
 
+/**
+ * 专用于实现类似 Picasso 等框架的无侵入式初始化, 获取 context
+ */
 internal class ZephyrProvider : ContentProvider() {
     override fun onCreate(): Boolean {
         val context = context ?: return false
