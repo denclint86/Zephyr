@@ -1,3 +1,33 @@
+# 快速开始
+
+## settings.gradle.kts
+
+```kotlin
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        ...
+        maven { url = uri("https://jitpack.io") } // 添加 jitpack 的 Maven
+    }
+}
+```
+
+## 模块 build.gradle.kts 依赖导入
+
+```kotlin
+dependencies {
+    // 按需导入
+    val version = "3.1.0" // 根据最新 release 来设置
+    implementation("com.github.niki914.Zephyr:datastore:$version")
+    implementation("com.github.niki914.Zephyr:log:$version")
+    implementation("com.github.niki914.Zephyr:net:$version")
+    implementation("com.github.niki914.Zephyr:scaling-layout:$version")
+    implementation("com.github.niki914.Zephyr:tools:$version")
+    implementation("com.github.niki914.Zephyr:vbclass:$version")
+}
+```
+
+# 模块介绍
 
 ## vbclass 模块
 
@@ -100,3 +130,9 @@ setOnCaughtListener { thread, throwable ->
 ## scaling layout 模块
 
 为  (scaling-layout)[https://github.com/iammert/ScalingLayout]  在新版本安卓上进行适配
+
+---
+
+## datastore 模块
+
+对 jetpack datastore 的封装
